@@ -1,3 +1,5 @@
+"""Defines Uniform1DGrid, which sets up a one-dimensional spatial grid."""
+
 import numpy as np
 
 
