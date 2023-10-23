@@ -2,15 +2,15 @@
 
 import numpy as np
 from make_grid import Uniform1DGrid
-from make_weight_funcs import ChargeWeightFunc
+from make_weight_func import ChargeWeightFunc
 
 
 class ChargeDeposition:
-    def __init__(self, shape_func="zeroth_order", grid=Uniform1DGrid()):
-        self.shape_func = ChargeWeightFunc.shape_func
-        self.grid = grid
+    def __init__(self, shape_func="zeroth_order", grid_array=Uniform1DGrid()):
+        self.shape_func = shape_func
+        self.grid = grid_array.grid
         self.delta = (
-            grid[1] - grid[0]
+            self.grid[1] - self.grid[0]
         )  # Assumes uniform grid. FIXME fix later for arbitrary grid
 
     def deposit(self, qarr, xarr):
@@ -20,12 +20,6 @@ class ChargeDeposition:
             len(rho)
         ):  # FIXME should be vectorized with numpy if possible, possibly in ChargeWeightFunc
             for j in range(len(xarr)):
-                rho[i] += self.shape_func(xarr[j], self.grid[i], self.delta) * qarr[j]
+                rho[i] += getattr(ChargeWeightFunc(xarr[j], self.grid[i], self.delta), self.shape_func)() * qarr[j]
 
         return rho
-
-    def zeroth(self, Xi, xj, delta):
-        if np.abs(xj - Xi) < delta / 2:
-            return 1 / delta
-        else:
-            return 0

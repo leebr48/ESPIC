@@ -3,10 +3,10 @@
 import numpy as np
 
 
-def ChargeWeightFunc:
+class ChargeWeightFunc:
 
     def __init__(self, evalutation_point, grid_point, spatial_grid_delta):
-        self.evalutation_point = Xi
+        self.evalutation_point = evalutation_point
         self.grid_point = grid_point
         self.spatial_grid_delta = spatial_grid_delta
 
