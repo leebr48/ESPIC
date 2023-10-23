@@ -1,8 +1,8 @@
 """Defines ChargeDeposition class, which places charges at float positions on the spatial grid."""
 
 import numpy as np
-from make_grid import Uniform1DGrid
-from make_weight_func import ChargeWeightFunc
+from .make_grid import Uniform1DGrid
+from .make_weight_func import ChargeWeightFunc
 
 
 class ChargeDeposition:
