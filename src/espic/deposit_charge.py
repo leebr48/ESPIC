@@ -10,7 +10,7 @@ class ChargeDeposition:
         self.grid = grid
         self.delta = (
             grid[1] - grid[0]
-        )  # Assumes uniform grid. Fix later for arbitrary grid
+        )  # Assumes uniform grid. FIXME fix later for arbitrary grid
 
     def deposit(self, qarr, xarr):
         rho = np.zeros(len(self.grid))

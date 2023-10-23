@@ -11,7 +11,7 @@ class MaxwellSolver1D:
         self.boundary_conditions = boundary_conditions
         self.phi = np.zeros(len(self.grid))
 
-    # Centered differences. Should we make it arbitrary?
+    # Centered differences. FIXME should we make it arbitrary?
     def solve(self, rho):
         delta = self.grid[1] - self.grid[0]
         dim = len(self.grid)
