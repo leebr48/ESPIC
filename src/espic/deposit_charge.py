@@ -16,7 +16,9 @@ class ChargeDeposition:
     def deposit(self, qarr, xarr):
         rho = np.zeros(len(self.grid))
 
-        for i in range(len(rho)): #FIXME should be vectorized with numpy if possible, possibly in ChargeWeightFunc
+        for i in range(
+            len(rho)
+        ):  # FIXME should be vectorized with numpy if possible, possibly in ChargeWeightFunc
             for j in range(len(xarr)):
                 rho[i] += self.shape_func(xarr[j], self.grid[i], self.delta) * qarr[j]
 

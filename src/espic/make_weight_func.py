@@ -4,7 +4,7 @@ import numpy as np
 
 
 def ChargeWeightFunc:
-    
+
     def __init__(self, evalutation_point, grid_point, spatial_grid_delta):
         self.evalutation_point = Xi
         self.grid_point = grid_point
