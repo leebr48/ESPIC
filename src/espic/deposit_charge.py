@@ -1,30 +1,25 @@
+"""Defines ChargeDeposition class, which places charges at float positions on the spatial grid."""
+
 import numpy as np
-from make_grid import Uniform1DGrid
+from .make_grid import Uniform1DGrid
+from .make_weight_func import ChargeWeightFunc
 
 
 class ChargeDeposition:
-    def __init__(self, shape="zeroth", grid=Uniform1DGrid()):
-        self.shape = shape
-        self.grid = grid
+    def __init__(self, shape_func="zeroth_order", grid_array=Uniform1DGrid()):
+        self.shape_func = shape_func
+        self.grid = grid_array.grid
         self.delta = (
-            grid[1] - grid[0]
-        )  # Assumes uniform grid. Fix later for arbitrary grid
+            self.grid[1] - self.grid[0]
+        )  # Assumes uniform grid. FIXME fix later for arbitrary grid
 
     def deposit(self, qarr, xarr):
         rho = np.zeros(len(self.grid))
-
+        
+        # FIXME loop should be vectorized with numpy if possible, possibly in ChargeWeightFunc
+        # FIXME this will hopefully make the function call less disgusting
         for i in range(len(rho)):
             for j in range(len(xarr)):
-                rho[i] += self.shape_func(xarr[j], self.grid[i], self.delta) * qarr[j]
+                rho[i] += getattr(ChargeWeightFunc(xarr[j], self.grid[i], self.delta), self.shape_func)() * qarr[j]
 
         return rho
-
-    def choose_shape(self):
-        if self.shape == "zeroth":
-            self.shape_func = self.zeroth
-
-    def zeroth(self, Xi, xj, delta):
-        if np.abs(xj - Xi) < delta / 2:
-            return 1 / delta
-        else:
-            return 0

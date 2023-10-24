@@ -1,5 +1,6 @@
-# ESPIC
-Electrostatic particle-in-cell code
+# Electrostatic particle-in-cell code (ESPIC)
+
+FIXME should configure __init__.py to only expose classes/functions we want users to have access to. Might consider renaming everything else with a leading "_".
 
 FIXME should perhaps set specific versions of numpy, scipy, etc in pyproject.toml.
 
