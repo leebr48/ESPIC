@@ -1,9 +1,11 @@
 import numpy as np
-from solve_maxwell import MaxwellSolver1D
-
 
 # Test 1D Maxwell solver for a uniform charge distribution
+from espic.solve_maxwell import MaxwellSolver1D
+
+
 def test_1d_uniform():
+    """Test 1D Maxwell solver for a uniform charge distribution"""
     ms = MaxwellSolver1D()
     rho = np.ones(len(ms.grid))
     phi = ms.solve(rho)
