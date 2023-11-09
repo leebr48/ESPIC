@@ -1,8 +1,9 @@
 """Defines MaxwellSolver1D, which calculates the electric field on the spatial grid."""
 
 import numpy as np
-from make_grid import Uniform1DGrid
 from scipy.linalg import solve_banded
+
+from .make_grid import Uniform1DGrid
 
 
 class MaxwellSolver1D:
