@@ -1,52 +1,27 @@
-"""Defines InterpolateField, which allows for the conversion of the potential on the spatial grid to the electric field at an arbitrary point in space."""
+"""Defines InterpolateField, which allows for the conversion of the potential on the spatial grid to the electric field on the spatial grid."""
 
 import numpy as np
-from scipy.interpolate import RectBivariateSpline
 
 
 class InterpolateField:
-    def __init__(self, x_grid, y_grid, phi_on_grid):
-        self.x_grid = x_grid
-        self.y_grid = y_grid
+    def __init__(self, grids, phi_on_grid):
+        # grids is a list of arrays, phi_on_grid is an array
+        self.grids = grids
         self.phi_on_grid = phi_on_grid
+        
+        # We need to ensure that E_on_grid is a list of arrays
+        if len(self.grids) == 1:
+            self.E_on_grid = [-1 * np.gradient(self.phi_on_grid, *self.grids)]
+        else:
+            self.E_on_grid = [-1 * ar for ar in np.gradient(self.phi_on_grid, *self.grids)]
     
-    # FIXME if you move this to the init, you might only need to do it once...
-    def interpolated_phi(self):
-        return RectBivariateSpline(self.x_grid, self.y_grid, self.phi_on_grid)
+    def find_nearest_spatial_node(self, coords):
+        # Coords should be 1D numpy array
+        assert len(self.grids) == coords.size
+        ids = [(np.abs(grid - coord)).argmin() for (coord, grid) in zip(coords, self.grids)]
+        return tuple(ids)
 
-    def calc_field(self, x_eval, y_eval):
-        derx = -1 * self.interpolated_phi().ev(x_eval, y_eval, dx=1, dy=0)
-        dery = -1 * self.interpolated_phi().ev(x_eval, y_eval, dx=0, dy=1)
-        return np.asarray([derx, dery])
-    '''
-    def calc_field(self, x_eval, y_eval):
-        derx = self.interpolated_phi().ev(x_eval, y_eval, dx=1, dy=0)
-        dery = self.interpolated_phi().ev(x_eval, y_eval, dx=0, dy=1)
-        return np.asarray([derx, dery])
-
-    def calc_field(self, x_eval, y_eval):
-        dery = -1 * self.interpolated_phi().ev(x_eval, y_eval, dx=1, dy=0)
-        derx = -1 * self.interpolated_phi().ev(x_eval, y_eval, dx=0, dy=1)
-        return np.asarray([derx, dery])
-
-    def calc_field(self, x_eval, y_eval):
-        dery = self.interpolated_phi().ev(x_eval, y_eval, dx=1, dy=0)
-        derx = self.interpolated_phi().ev(x_eval, y_eval, dx=0, dy=1)
-        return np.asarray([derx, dery])
-    '''
-
-
-    # FIXME should we have this in a 'helper function' file?
-    def calc_gradient_2D(self, x_eval, y_eval, h=1e-3):
-        # Oddly, 2D gradients with SciPy splines are difficult, so we must implement one.
-        # FIXME implement other differencing schemes?
-        phi = self.interpolated_phi()
-        # Apply the center differencing scheme
-        derx = (phi.ev(x_eval + h, y_eval) - phi.ev(x_eval - h, y_eval)) / (2 * h)
-        dery = (phi.ev(x_eval, y_eval + h) - phi.ev(x_eval, y_eval - h)) / (2 * h)
-        return np.asarray((derx, dery))
-    '''
-    def calc_field(self, x_eval, y_eval):
-        gradient = self.calc_gradient_2D(x_eval, y_eval)
-        return -1 * gradient
-    '''
+    def ev(self, coords):
+        coords = np.asarray(coords)
+        ids = self.find_nearest_spatial_node(coords)
+        return [ar[ids] for ar in self.E_on_grid]
