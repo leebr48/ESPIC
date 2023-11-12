@@ -9,7 +9,8 @@ class InterpolateField:
         self.x_grid = x_grid
         self.y_grid = y_grid
         self.phi_on_grid = phi_on_grid
-
+    
+    # FIXME if you move this to the init, you might only need to do it once...
     def interpolated_phi(self):
         return RectBivariateSpline(self.x_grid, self.y_grid, self.phi_on_grid)
 
