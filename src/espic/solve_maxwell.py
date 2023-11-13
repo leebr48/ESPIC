@@ -142,7 +142,7 @@ class MaxwellSolver2D:
         phi[:, 0] = self.boundary_conditions["left"]
 
         phi[1 : gridsize - 1, 1 : gridsize - 1] = phi_v.reshape(
-            (gridsize - 2, gridsize - 2)
+            (gridsize - 2, gridsize - 2),
         )
         return phi
 
