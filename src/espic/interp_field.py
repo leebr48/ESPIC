@@ -1,6 +1,7 @@
 """Defines InterpolateField, which allows for the conversion of the potential on the spatial grid to the electric field on the spatial grid."""
 
 import numpy as np
+from scipy.interpolate import RegularGridInterpolator
 
 
 class InterpolateField:
@@ -15,14 +16,10 @@ class InterpolateField:
             self.E_on_grid = [-1 * np.gradient(self.phi_on_grid, *self.grids)]
         else:
             self.E_on_grid = [-1 * ar for ar in np.gradient(self.phi_on_grid, *self.grids)]
+        
+        # We can interpolate the electric field using the PChip algorithm because it does not overshoot,
+        # which is quite important when working with electric fields and potentials
+        self.interpolated_E = [RegularGridInterpolator(grids, ar, method='pchip') for ar in self.E_on_grid]
     
-    def find_nearest_spatial_node(self, coords):
-        # Coords should be 1D numpy array
-        assert len(self.grids) == coords.size
-        ids = [(np.abs(grid - coord)).argmin() for (coord, grid) in zip(coords, self.grids)]
-        return tuple(ids)
-
     def ev(self, coords):
-        coords = np.asarray(coords)
-        ids = self.find_nearest_spatial_node(coords)
-        return [ar[ids] for ar in self.E_on_grid]
+        return np.asarray([interp(coords) for interp in self.interpolated_E]).T
