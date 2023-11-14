@@ -3,10 +3,9 @@
 import numpy as np
 from dataclasses import dataclass
 
-# FIXME test!!!
-@dataclass(eq=False)
+@dataclass
 class Particle():
-    charge: int
-    mass: float
-    position: np.ndarray
-    velocity: np.ndarray
+    charge: int 
+    mass: float # FIXME positive
+    position: np.ndarray # FIXME 1D, 1-3 elements!
+    velocity: np.ndarray # FIXME 1D, 1-3 elements!

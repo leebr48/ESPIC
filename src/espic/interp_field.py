@@ -1,10 +1,10 @@
-"""Defines InterpolateField, which allows for the conversion of the potential on the spatial grid to the electric field on the spatial grid."""
+"""Defines InterpolatedField, which allows for the conversion of the potential on the spatial grid to the electric field on the spatial grid."""
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
 
-class InterpolateField:
+class InterpolatedField:
     def __init__(self, grids, phi_on_grid):
         # grids is a list of arrays (x or x,y), phi_on_grid is an array (x or x,y)
         # phi_on_grid indexed in the np.meshgrid way *with indexing='ij'*. The default will not work!!
