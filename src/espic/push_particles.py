@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class ParticlePusher:
     def __init__(self, particles, electric_field, dt=1e-2):
         # particles is a Particles object
@@ -15,6 +16,11 @@ class ParticlePusher:
         if dt is None:
             dt = self.dt
         dx = self.particles.velocities * dt
-        dv = self.particles.charges[:, np.newaxis] / self.particles.masses[:, np.newaxis] * self.E.ev(self.particles.positions) * dt
+        dv = (
+            self.particles.charges[:, np.newaxis]
+            / self.particles.masses[:, np.newaxis]
+            * self.E.ev(self.particles.positions)
+            * dt
+        )
         self.particles.positions = self.particles.positions + dx
         self.particles.velocities = self.particles.velocities + dv

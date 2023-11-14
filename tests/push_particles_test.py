@@ -1,9 +1,11 @@
 """Test particle pusher class"""
 
 import numpy as np
+
 from espic.def_particles import Particles
 from espic.interp_field import InterpolatedField
 from espic.push_particles import ParticlePusher
+
 
 def test_push_1D_null_field():
     q = np.asarray([2])
@@ -17,8 +19,9 @@ def test_push_1D_null_field():
     interpolated_field = InterpolatedField([x_vec], phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
-    
+
     assert np.allclose(particle_pusher.particles.positions, pos + vel * dt)
+
 
 def test_push_1D_linear_potential():
     q = np.asarray([2])
@@ -32,12 +35,13 @@ def test_push_1D_linear_potential():
     interpolated_field = InterpolatedField([x_vec], phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
-    
+
     assert np.allclose(particle_pusher.particles.positions, pos + vel * dt)
 
     particle_pusher.evolve()
 
     assert np.allclose(particle_pusher.particles.positions, 0.53988)
+
 
 def test_push_1D_linear_potential_multiparticle():
     qs = np.asarray([2, -1])
@@ -51,12 +55,16 @@ def test_push_1D_linear_potential_multiparticle():
     interpolated_field = InterpolatedField([x_vec], phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
-    
+
     assert np.allclose(particle_pusher.particles.positions, positions + velocities * dt)
 
     particle_pusher.evolve()
 
-    assert np.allclose(particle_pusher.particles.positions, np.asarray([0.53988, 0.22015])[:, np.newaxis])
+    assert np.allclose(
+        particle_pusher.particles.positions,
+        np.asarray([0.53988, 0.22015])[:, np.newaxis],
+    )
+
 
 def test_push_2D_parabolic_potential_multiparticle():
     qs = np.asarray([2, -1])
@@ -72,14 +80,17 @@ def test_push_2D_parabolic_potential_multiparticle():
     interpolated_field = InterpolatedField([x_vec, y_vec], zz)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
-    
+
     assert np.allclose(particle_pusher.particles.positions, positions + velocities * dt)
 
     particle_pusher.evolve()
 
     target_positions = np.asarray([[0.5399584, -0.2699792], [0.2200235, 1.00510025]])
 
-    assert np.allclose(particle_pusher.particles.positions, target_positions, atol=2e-6, rtol=0)
+    assert np.allclose(
+        particle_pusher.particles.positions, target_positions, atol=2e-6, rtol=0
+    )
+
 
 def test_dt_change():
     q = np.asarray([2])
@@ -94,5 +105,5 @@ def test_dt_change():
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     dt_new = 1e-1
     particle_pusher.evolve(dt=dt_new)
-    
+
     assert np.allclose(particle_pusher.particles.positions, pos + vel * dt_new)
