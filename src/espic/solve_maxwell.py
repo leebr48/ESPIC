@@ -103,12 +103,7 @@ class MaxwellSolver2D:
         r = np.zeros(N2)
 
         r = -4 * np.pi * h**2 * rho_v
-        bc = {
-            "bottom": np.zeros(N),
-            "top": np.zeros(N),
-            "left": np.zeros(N),
-            "right": np.zeros(N),
-        }
+        bc = self.boundary_conditions
 
         # Boundary
         b_bottom_top = np.zeros(N2)
@@ -118,13 +113,12 @@ class MaxwellSolver2D:
 
         b_left_right = np.zeros(N2)
         for j in range(N - 2):
-            b_left_right[(N - 1) * j] = bc["left"][j]  # Left Boundary
+            b_left_right[(N - 2) * j] = bc["left"][j]  # Left Boundary
             b_left_right[N - 3 + (N - 2) * j] = bc["right"][j]  # Right Boundary
 
         b = b_left_right + b_bottom_top
 
-        rhs = r + b
-
+        rhs = r - b
         return rhs
 
     def solve(self, rho):
@@ -145,39 +139,3 @@ class MaxwellSolver2D:
             (gridsize - 2, gridsize - 2),
         )
         return phi
-
-    # def solve(self, rho):
-
-    #     gridsize = len(self.xgrid)
-    #     A = np.zeros(shape=(gridsize-2,gridsize-2,gridsize-2,gridsize-2),dtype='d')
-    #     print("A.shape is " + str(A.shape))
-
-    #     phi = np.zeros(shape=(gridsize,gridsize),dtype='d')
-    #     dx = self.xgrid[1] - self.xgrid[0]
-
-    #     #Apply boundary conditions to phi
-    #     phi[0,:] = self.boundary_conditions[0]
-    #     phi[:,-1] = self.boundary_conditions[1]
-    #     phi[-1,:] = self.boundary_conditions[2]
-    #     phi[:,0] = self.boundary_conditions[3]
-
-    #     #Setup rhs
-    #     rho = rho[1:-1,1:-1]
-    #     bc = np.zeros(rho.shape)
-    #     bc[0,:] = phi[0,1:-1]
-    #     bc[:,-1] = phi[1:-1,-1]
-    #     bc[-1,:] = phi[-1,1:-1]
-    #     bc[:,0] = phi[1:-1,0]
-    #     rhs = -4 * np.pi * dx**2 * rho + bc
-
-    #     # discretized differential operator
-    #     for i in range(1,gridsize-3):
-    #         for j in range(1,gridsize-3):
-    #             A[i,j,i-1,j] = A[i,j,i+1,j] = A[i,j,i,j-1] = A[i,j,i,j+1] = 1/dx**2
-    #             A[i,j,i,j] = -4/dx**2
-
-    #     #Solve for phi
-    #     print("rhs.shape is " + str(rhs.shape))
-    #     phi[1:-1,1:-1] = np.linalg.tensorsolve(A,rhs)
-
-    #     return phi
