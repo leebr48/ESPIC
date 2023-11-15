@@ -7,7 +7,7 @@ name = "espic"
 version = "0.1"
 authors = [
   { name="Patrick Kim" },
-  { name="Brandon Lee"}
+  { name="Brandon Lee" },
 ]
 description = "Electrostatic particle-in-cell code"
 readme = "README.md"
@@ -16,7 +16,6 @@ dependencies = [
   "numpy",
   "scipy",
   "matplotlib",
-  "pytest",
 ]
 classifiers = [
   "Private :: Do Not Upload",

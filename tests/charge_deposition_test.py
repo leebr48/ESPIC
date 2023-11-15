@@ -1,6 +1,7 @@
+"""Test charge deposition routine"""
+
 import numpy as np
 
-# Test charge deposition routine
 from espic.deposit_charge import ChargeDeposition
 
 

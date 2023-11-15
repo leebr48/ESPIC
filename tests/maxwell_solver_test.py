@@ -36,7 +36,7 @@ def test_2d_laplace():
     a = 2
     b = 1
 
-    grid = Uniform2DGrid(num_points=N, x0=-b, xm=b, y0=0, ym=a)
+    grid = Uniform2DGrid(num_points=N, x_min=-b, x_max=b, y_min=0, y_max=a)
     boundary_conditions = {
         "bottom": np.zeros(N),
         "top": np.zeros(N),
@@ -82,7 +82,7 @@ def test_2d_poisson_uniform():
     a = 2
     b = 1
 
-    grid = Uniform2DGrid(num_points=N, x0=-b, xm=b, y0=0, ym=a)
+    grid = Uniform2DGrid(num_points=N, x_min=-b, x_max=b, y_min=0, y_max=a)
     bc_bottom = -np.pi * grid.xgrid**2
     bc_top = -np.pi * (grid.xgrid**2 + (a * np.ones(len(grid.ygrid))) ** 2)
     bc_left = V0 - np.pi * ((-b * np.ones(len(grid.xgrid))) ** 2 + grid.ygrid**2)
