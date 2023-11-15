@@ -15,5 +15,4 @@ class ChargeWeightFunc:
             < self.spatial_grid_delta / 2
         ):
             return 1 / self.spatial_grid_delta
-        else:
-            return 0
+        return 0
