@@ -22,7 +22,7 @@ class InterpolateField:
         ids = [(np.abs(grid - coord)).argmin() for (coord, grid) in zip(coords, self.grids)]
         return tuple(ids)
 
-    def ev(self, coords):
+    def evaluate(self, coords):
         coords = np.asarray(coords)
         ids = self.find_nearest_spatial_node(coords)
         return [ar[ids] for ar in self.E_on_grid]
