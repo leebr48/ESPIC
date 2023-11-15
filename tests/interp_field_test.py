@@ -3,12 +3,13 @@
 import numpy as np
 
 from espic.interp_field import InterpolatedField
+from espic.make_grid import Uniform1DGrid
 
 
 def test_interpolate_field_1D_null_field():
-    x_vec = np.linspace(0, 1, num=10)
-    phi_on_grid = np.ones(x_vec.size)
-    interpolated_field = InterpolatedField([x_vec], phi_on_grid)
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = np.ones(x_grid.size)
+    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
     evaluated_field = interpolated_field.evaluate([0.5])
     target_field = np.asarray([0])
 
@@ -16,9 +17,9 @@ def test_interpolate_field_1D_null_field():
 
 
 def test_interpolate_field_1D_linear_potential():
-    x_vec = np.linspace(0, 1, num=10)
-    phi_on_grid = 3 * x_vec
-    interpolated_field = InterpolatedField([x_vec], phi_on_grid)
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = 3 * x_grid.grid
+    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
     pts = [0, 0.5, 1]
     evaluated_field = interpolated_field.evaluate(pts)
     target_field = np.asarray([-3] * 3)
@@ -27,10 +28,10 @@ def test_interpolate_field_1D_linear_potential():
 
 
 def test_interpolate_field_2D_null_field():
-    x_vec = np.linspace(0, 1, num=10)
-    y_vec = x_vec
-    phi_on_grid = np.ones((x_vec.size, y_vec.size))
-    interpolated_field = InterpolatedField([x_vec, y_vec], phi_on_grid)
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    y_grid = x_grid
+    phi_on_grid = np.ones((x_grid.size, y_grid.size))
+    interpolated_field = InterpolatedField([x_grid, y_grid], phi_on_grid)
     evaluated_field = interpolated_field.evaluate([0.5] * 2)
     target_field = np.asarray([0] * 2)
 
@@ -38,13 +39,13 @@ def test_interpolate_field_2D_null_field():
 
 
 def test_interpolate_field_2D_linear_potential():
-    x_vec = np.linspace(0, 1, num=100)
-    y_vec = x_vec
-    xx, yy = np.meshgrid(x_vec, y_vec, indexing="ij")
+    x_grid = Uniform1DGrid(num_points=100, x_min=0, x_max=1)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
     zz1 = xx
     zz2 = yy
-    interpolated_field1 = InterpolatedField([x_vec, y_vec], zz1)
-    interpolated_field2 = InterpolatedField([x_vec, y_vec], zz2)
+    interpolated_field1 = InterpolatedField([x_grid, y_grid], zz1)
+    interpolated_field2 = InterpolatedField([x_grid, y_grid], zz2)
     pts = [0.5, 0.5]
     evaluated_field1 = interpolated_field1.evaluate(pts)
     evaluated_field2 = interpolated_field2.evaluate(pts)
@@ -56,11 +57,11 @@ def test_interpolate_field_2D_linear_potential():
 
 
 def test_interpolate_field_2D_parabolic_potential():
-    x_vec = np.linspace(-2, 2, num=1000)
-    y_vec = x_vec
-    xx, yy = np.meshgrid(x_vec, y_vec, indexing="ij")
+    x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
     zz = xx**2 + yy**2
-    interpolated_field = InterpolatedField([x_vec, y_vec], zz)
+    interpolated_field = InterpolatedField([x_grid, y_grid], zz)
     pts = [[0, 0], [-1, 1], [1.5, -1.5], [0.5, 1]]
     evaluated_field = interpolated_field.evaluate(pts)
     target_field = np.asarray([[0, 0], [2, -2], [-3, 3], [-1, -2]])
@@ -69,11 +70,11 @@ def test_interpolate_field_2D_parabolic_potential():
 
 
 def test_interpolate_field_2D_semiparabolic_potential():
-    x_vec = np.linspace(-2, 2, num=1000)
-    y_vec = x_vec
-    xx, yy = np.meshgrid(x_vec, y_vec, indexing="ij")
+    x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
     zz = xx**2 - 2 * yy**2
-    interpolated_field = InterpolatedField([x_vec, y_vec], zz)
+    interpolated_field = InterpolatedField([x_grid, y_grid], zz)
     pts = [[0, 0], [-1, 1], [1.5, -1.5], [0.5, 1]]
     evaluated_field = interpolated_field.evaluate(pts)
     target_field = np.asarray([[0, 0], [2, 4], [-3, -6], [-1, 4]])
@@ -81,12 +82,12 @@ def test_interpolate_field_2D_semiparabolic_potential():
     assert np.allclose(evaluated_field, target_field)
 
 
-def test_interpolate_field_messy_potential():
-    x_vec = np.linspace(-2, 2, num=1000)
-    y_vec = x_vec
-    xx, yy = np.meshgrid(x_vec, y_vec, indexing="ij")
+def test_interpolate_field_asymmetric_grids_messy_potential():
+    x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
+    y_grid = Uniform1DGrid(num_points=2000, x_min=-3, x_max=4)
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
     zz = xx**2 - 2 * yy**2 + 3 * xx * yy
-    interpolated_field = InterpolatedField([x_vec, y_vec], zz)
+    interpolated_field = InterpolatedField([x_grid, y_grid], zz)
     pts = [[1, 1.5], [-0.5, 0], [-1, 1]]
     evaluated_field = interpolated_field.evaluate(pts)
     target_field = np.asarray([[-6.5, 3], [1, 1.5], [-1, 7]])

@@ -4,6 +4,7 @@ import numpy as np
 
 from espic.def_particles import Particles
 from espic.interp_field import InterpolatedField
+from espic.make_grid import Uniform1DGrid
 from espic.push_particles import ParticlePusher
 
 
@@ -12,11 +13,11 @@ def test_push_1D_null_field():
     m = np.asarray([5.5])
     pos = np.asarray([0.5])
     vel = np.asarray([-2])
-    x_vec = np.linspace(0, 1, num=10)
-    phi_on_grid = np.ones(x_vec.size)
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = np.ones(x_grid.size)
     dt = 1e-2
     particles = Particles(q, m, pos, vel)
-    interpolated_field = InterpolatedField([x_vec], phi_on_grid)
+    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
 
@@ -28,11 +29,11 @@ def test_push_1D_linear_potential():
     m = np.asarray([5])
     pos = np.asarray([0.5])
     vel = np.asarray([2])
-    x_vec = np.linspace(0, 1, num=10)
-    phi_on_grid = 3 * x_vec
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = 3 * x_grid.grid
     dt = 1e-2
     particles = Particles(q, m, pos, vel)
-    interpolated_field = InterpolatedField([x_vec], phi_on_grid)
+    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
 
@@ -48,11 +49,11 @@ def test_push_1D_linear_potential_multiparticle():
     ms = np.asarray([5, 2])
     positions = np.asarray([[0.5], [0.25]])
     velocities = np.asarray([[2], [-1.5]])
-    x_vec = np.linspace(0, 1, num=10)
-    phi_on_grid = 3 * x_vec
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = 3 * x_grid.grid
     dt = 1e-2
     particles = Particles(qs, ms, positions, velocities)
-    interpolated_field = InterpolatedField([x_vec], phi_on_grid)
+    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
 
@@ -71,13 +72,13 @@ def test_push_2D_parabolic_potential_multiparticle():
     ms = np.asarray([5, 2])
     positions = np.asarray([[0.5, -0.25], [0.25, 1]])
     velocities = np.asarray([[2, -1], [-1.5, 0.25]])
-    x_vec = np.linspace(-2, 2, num=1000)
-    y_vec = x_vec
-    xx, yy = np.meshgrid(x_vec, y_vec, indexing="ij")
+    x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
     zz = xx**2 + yy**2
     dt = 1e-2
     particles = Particles(qs, ms, positions, velocities)
-    interpolated_field = InterpolatedField([x_vec, y_vec], zz)
+    interpolated_field = InterpolatedField([x_grid, y_grid], zz)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
 
@@ -88,7 +89,10 @@ def test_push_2D_parabolic_potential_multiparticle():
     target_positions = np.asarray([[0.5399584, -0.2699792], [0.2200235, 1.00510025]])
 
     assert np.allclose(
-        particle_pusher.particles.positions, target_positions, atol=2e-6, rtol=0
+        particle_pusher.particles.positions,
+        target_positions,
+        atol=2e-6,
+        rtol=0,
     )
 
 
@@ -97,11 +101,11 @@ def test_dt_change():
     m = np.asarray([5.5])
     pos = np.asarray([0.5])
     vel = np.asarray([-2])
-    x_vec = np.linspace(0, 1, num=10)
-    phi_on_grid = np.ones(x_vec.size)
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = np.ones(x_grid.size)
     dt = 1e-2
     particles = Particles(q, m, pos, vel)
-    interpolated_field = InterpolatedField([x_vec], phi_on_grid)
+    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     dt_new = 1e-1
     particle_pusher.evolve(dt=dt_new)
