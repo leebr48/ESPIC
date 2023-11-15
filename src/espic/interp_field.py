@@ -1,4 +1,4 @@
-"""Defines InterpolatedField, which allows for the conversion of the potential on the spatial grid to the electric field on the spatial grid."""
+"""Defines InterpolatedField, which allows for the conversion of the potential on the spatial grid to the electric field at an arbitrary point in space."""
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
@@ -25,5 +25,5 @@ class InterpolatedField:
             RegularGridInterpolator(grids, ar, method="pchip") for ar in self.E_on_grid
         ]
 
-    def ev(self, coords):
+    def evaluate(self, coords):
         return np.asarray([interp(coords) for interp in self.interpolated_E]).T

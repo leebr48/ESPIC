@@ -19,7 +19,7 @@ class ParticlePusher:
         dv = (
             self.particles.charges[:, np.newaxis]
             / self.particles.masses[:, np.newaxis]
-            * self.E.ev(self.particles.positions)
+            * self.E.evaluate(self.particles.positions)
             * dt
         )
         self.particles.positions = self.particles.positions + dx
