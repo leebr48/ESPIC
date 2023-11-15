@@ -2,7 +2,7 @@
 
 import numpy as np
 from scipy.linalg import solve_banded
-from scipy.sparse.linalg import spsolve
+from scipy.linalg import solve
 
 from espic.make_grid import Uniform1DGrid, Uniform2DGrid
 
@@ -40,14 +40,6 @@ class MaxwellSolver1D:
 # Code taken from https://john-s-butler-dit.github.io/NumericalAnalysisBook/Chapter%2009%20-%20Elliptic%20Equations/903_Poisson%20Equation-Boundary.html
 # FIXME: for now, this assumes equal spacing in x and y.
 class MaxwellSolver2D:
-    def boundary_zero(grid):
-        x = np.linspace(0, 1, len(grid))
-
-        grid[0, :] = np.interp(x, [0, 1], [0, 1])
-        grid[:, -1] = np.interp(x, [0, 1], [1, 0])
-        grid[-1, :] = np.interp(x, [0, 1], [-1, 0])
-        grid[:, 0] = np.interp(x, [0, 1], [0, -1])
-
     def __init__(self, grid=Uniform2DGrid(), boundary_conditions=None):
         self.grid = grid.grid
         self.xgrid = grid.xgrid
@@ -64,6 +56,9 @@ class MaxwellSolver2D:
 
         self.boundary_conditions = boundary_conditions
         self.phi = np.zeros((len(self.grid), len(self.grid)))
+
+        # It's better to set A in the initialization, since it doesn't change over time.
+        self.A = self.set_A(len(self.xgrid))
 
     def set_A(self, N):
         N2 = (N - 2) * (N - 2)
@@ -123,17 +118,18 @@ class MaxwellSolver2D:
 
     def solve(self, rho):
         gridsize = len(self.xgrid)
-        A = self.set_A(gridsize)
-
         h = self.xgrid[1] - self.xgrid[0]
         rhs = self.set_rhs(gridsize, h, rho, self.boundary_conditions)
 
-        phi_v = spsolve(A, rhs)
+        # This is still a banded matrix, but now the locations of the bands depends on N. Will make more efficient later.
+        phi_v = solve(self.A, rhs)
         phi = np.zeros((gridsize, gridsize))
-        phi[0, :] = self.boundary_conditions["top"]
+
+        # Apply bc. Have to flip top and bottom bc because phi matrix goes down to up
         phi[:, -1] = self.boundary_conditions["right"]
-        phi[-1, :] = self.boundary_conditions["bottom"]
         phi[:, 0] = self.boundary_conditions["left"]
+        phi[-1, :] = self.boundary_conditions["top"]
+        phi[0, :] = self.boundary_conditions["bottom"]
 
         phi[1 : gridsize - 1, 1 : gridsize - 1] = phi_v.reshape(
             (gridsize - 2, gridsize - 2),
