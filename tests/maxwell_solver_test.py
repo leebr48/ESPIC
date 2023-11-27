@@ -30,7 +30,7 @@ def test_2d_boundary():
 
 
 def test_2d_laplace():
-    """Test 2D Poisson solver for rho = 0. Ex taken from Ex 3.4 in Griffiths E&M, 4th ed"""
+    """Test 2D Poisson solver for rho = 0. Taken from Example 3.4 in Griffiths, "Introduction to Electrodynamics," 4th ed."""
     N = 100
     V0 = 1
     a = 2
@@ -65,14 +65,11 @@ def test_2d_laplace():
                 * np.sin(i * np.pi * Y / a)
             )
 
-    # There are some issues that I believe are related to the convergence of an infinite Fourier series
-    # For now, these "magic" numbers should be kept fixed.
+    # FIXME There are some issues that I believe are related to the convergence of an infinite Fourier series
+    # FIXME For now, these "magic" numbers should be kept fixed.
 
     err = np.abs(true_phi[1:-1, 1:-1] - phi[1:-1, 1:-1])
     np.testing.assert_allclose(err, np.zeros(err.shape), atol=1e-2)
-
-
-# return phi, true_phi, X, Y
 
 
 def test_2d_poisson_uniform():
@@ -83,10 +80,10 @@ def test_2d_poisson_uniform():
     b = 1
 
     grid = Uniform2DGrid(num_points=N, x_min=-b, x_max=b, y_min=0, y_max=a)
-    bc_bottom = -np.pi * grid.xgrid**2
-    bc_top = -np.pi * (grid.xgrid**2 + (a * np.ones(len(grid.ygrid))) ** 2)
-    bc_left = V0 - np.pi * ((-b * np.ones(len(grid.xgrid))) ** 2 + grid.ygrid**2)
-    bc_right = V0 - np.pi * ((b * np.ones(len(grid.xgrid))) ** 2 + grid.ygrid**2)
+    bc_bottom = -np.pi * grid.x_grid**2
+    bc_top = -np.pi * (grid.x_grid**2 + (a * np.ones(len(grid.y_grid))) ** 2)
+    bc_left = V0 - np.pi * ((-b * np.ones(len(grid.x_grid))) ** 2 + grid.y_grid**2)
+    bc_right = V0 - np.pi * ((b * np.ones(len(grid.x_grid))) ** 2 + grid.y_grid**2)
     boundary_conditions = {
         "bottom": bc_bottom,
         "top": bc_top,
@@ -115,9 +112,9 @@ def test_2d_poisson_uniform():
                 * np.sin(i * np.pi * Y / a)
             )
     true_phi += -np.pi * (X**2 + Y**2)
-    # There are some issues that I believe are related to the convergence of an infinite Fourier series
-    # For now, these "magic" numbers should be kept fixed.
+    # FIXME There are some issues that I believe are related to the convergence of an infinite Fourier series
+    # FIXME For now, these "magic" numbers should be kept fixed.
     err = np.abs(true_phi - phi)
 
-    # There are some issues here near the boundaries. The max error goes to about 0.22. Not sure what the problem is.
+    # FIXME There are some issues here near the boundaries. The max error goes to about 0.22. Not sure what the problem is.
     np.testing.assert_allclose(err, np.zeros(err.shape), atol=1)

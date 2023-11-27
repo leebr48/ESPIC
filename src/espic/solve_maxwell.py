@@ -1,8 +1,7 @@
 """Defines MaxwellSolver1D, which calculates the electric field on the spatial grid."""
 
 import numpy as np
-from scipy.linalg import solve_banded
-from scipy.linalg import solve
+from scipy.linalg import solve, solve_banded
 
 from espic.make_grid import Uniform1DGrid, Uniform2DGrid
 
@@ -42,11 +41,11 @@ class MaxwellSolver1D:
 class MaxwellSolver2D:
     def __init__(self, grid=Uniform2DGrid(), boundary_conditions=None):
         self.grid = grid.grid
-        self.xgrid = grid.xgrid
-        self.ygrid = grid.ygrid
+        self.x_grid = grid.x_grid
+        self.y_grid = grid.y_grid
 
         if boundary_conditions is None:
-            N = len(self.xgrid)
+            N = len(self.x_grid)
             boundary_conditions = {
                 "bottom": np.zeros(N),
                 "top": np.zeros(N),
@@ -58,7 +57,7 @@ class MaxwellSolver2D:
         self.phi = np.zeros((len(self.grid), len(self.grid)))
 
         # It's better to set A in the initialization, since it doesn't change over time.
-        self.A = self.set_A(len(self.xgrid))
+        self.A = self.set_A(len(self.x_grid))
 
     def set_A(self, N):
         N2 = (N - 2) * (N - 2)
@@ -117,8 +116,8 @@ class MaxwellSolver2D:
         return rhs
 
     def solve(self, rho):
-        gridsize = len(self.xgrid)
-        h = self.xgrid[1] - self.xgrid[0]
+        gridsize = len(self.x_grid)
+        h = self.x_grid[1] - self.x_grid[0]
         rhs = self.set_rhs(gridsize, h, rho, self.boundary_conditions)
 
         # This is still a banded matrix, but now the locations of the bands depends on N. Will make more efficient later.

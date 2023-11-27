@@ -21,7 +21,10 @@ class Uniform2DGrid:
         self.y_min = y_min
         self.y_max = y_max
 
-        self.xgrid = np.linspace(self.x_min, self.x_max, self.num_points)
-        self.ygrid = np.linspace(self.y_min, self.y_max, self.num_points)
+        self.x_grid = np.linspace(self.x_min, self.x_max, self.num_points)
+        self.y_grid = np.linspace(self.y_min, self.y_max, self.num_points)
 
-        self.grid = np.meshgrid(self.xgrid, self.ygrid)
+        self.grid = np.meshgrid(self.x_grid, self.y_grid)
+
+        self.size = self.x_grid.size * self.y_grid.size
+        self.shape = (self.x_grid.shape, self.y_grid.shape)
