@@ -7,28 +7,34 @@ from espic.make_weight_func import ChargeWeightFunc
 
 
 class ChargeDeposition:
-    def __init__(self, shape_func="zeroth_order", grid_array=Uniform1DGrid()):
+    def __init__(self, shape_func="zeroth_order", grid=Uniform1DGrid()):
         self.shape_func = shape_func
-        self.grid = grid_array.grid
-        self.delta = (
-            self.grid[1] - self.grid[0]
-        )  # Assumes uniform grid. FIXME fix later for arbitrary grid
+        self.grid = grid
 
-    def deposit(self, qarr, xarr):
-        rho = np.zeros(len(self.grid))
+    def return_coords(self, grid):
+        if len(self.grid.shape) == 1:
+            coords = self.grid.grid.reshape((len(self.grid.grid), 1))
+        else:
+            c = ()
+            for i in range(len(self.grid.grid)):
+                c = c + (self.grid.grid[len(self.grid.grid) - (i + 1)].ravel(),)
+            coords = np.column_stack(c)
+        return coords
 
-        # FIXME loop should be vectorized with numpy if possible, possibly in ChargeWeightFunc
-        # FIXME this will hopefully make the function call less disgusting
-        # FIXME should be faster now, but it may be better to move to ChargeWeightFunc
-        condition = np.abs(self.grid[:, None] - xarr[None, :]) < self.delta
-        for i in range(len(rho)):
-            x_close = xarr[condition[i, :]]
-            for j in range(len(x_close)):
-                rho[i] += (
-                    getattr(
-                        ChargeWeightFunc(x_close[j], self.grid[i], self.delta),
-                        self.shape_func,
-                    )()
-                    * qarr[j]
-                )
+    def deposit(self, q_arr, pos_arr):
+        if len(pos_arr.shape) == 1:
+            pos_arr = pos_arr.reshape((len(pos_arr), 1))
+        else:
+            pos_arr = pos_arr.reshape((len(pos_arr), len(pos_arr[0])))
+        rho = np.zeros(self.grid.size)
+
+        coords = self.return_coords(self.grid)
+
+        dist = np.linalg.norm(coords[:, None] - pos_arr[None, :], axis=2)
+        for i in range(len(pos_arr)):
+            disti = dist[:, i]
+            rho += ChargeWeightFunc(disti, self.grid.delta).zeroth_order() * q_arr[i]
+
+        rho = rho.reshape(self.grid.shape)
+
         return rho

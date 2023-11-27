@@ -11,6 +11,7 @@ class Uniform1DGrid:
         self.grid = np.linspace(self.x_min, self.x_max, self.num_points)
         self.size = self.grid.size
         self.shape = self.grid.shape
+        self.delta = self.grid[1] - self.grid[0]
 
 
 class Uniform2DGrid:
@@ -27,4 +28,6 @@ class Uniform2DGrid:
         self.grid = np.meshgrid(self.x_grid, self.y_grid)
 
         self.size = self.x_grid.size * self.y_grid.size
-        self.shape = (self.x_grid.shape, self.y_grid.shape)
+        self.shape = (self.x_grid.shape[0], self.y_grid.shape[0])
+
+        self.delta = self.x_grid[1] - self.x_grid[0]
