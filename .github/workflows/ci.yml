@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  format:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +20,21 @@ jobs:
       - run: pip install nox
 
       - run: nox -s lint
+  
+  type:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  tests:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - run: pip install nox
+
+      - run: nox -s type
+
+  test:
     strategy:
       matrix:
         python_version: ["3.8", "3.12"]
