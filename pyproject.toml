@@ -47,3 +47,9 @@ ignore = [
   "D212",
 ]
 src = ["src"]
+
+[tool.mypy]
+mypy_path = './src'
+packages = 'espic'
+strict = true
+ignore_missing_imports = true

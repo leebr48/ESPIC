@@ -1,4 +1,4 @@
-"""Test particle class"""
+"""Test Particles class."""
 
 import numpy as np
 
@@ -6,6 +6,7 @@ from espic.def_particles import Particles
 
 
 def test_particles_1D():
+    # Test with 1D positions and velocities.
     qs = np.asarray([1, 2])
     ms = np.asarray([5.5, 6.5])
     positions = np.asarray([[1.1], [2.2]])
@@ -19,6 +20,7 @@ def test_particles_1D():
 
 
 def test_particle_2D():
+    # Test with 2D positions and velocities.
     qs = np.asarray([1, 2])
     ms = np.asarray([5.5, 6.5])
     positions = np.asarray([[1.1, -2.2], [-3.3, 4.4]])

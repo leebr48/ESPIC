@@ -7,9 +7,10 @@ from espic.make_grid import Uniform1DGrid
 
 
 def test_interpolate_field_1D_null_field():
+    # Simplest possible test - 1D, zero electric field
     x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
     phi_on_grid = np.ones(x_grid.size)
-    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
+    interpolated_field = InterpolatedField([x_grid], phi_on_grid)
     evaluated_field = interpolated_field.evaluate([0.5])
     target_field = np.asarray([0])
 
@@ -17,9 +18,10 @@ def test_interpolate_field_1D_null_field():
 
 
 def test_interpolate_field_1D_linear_potential():
+    # 1D test with constant electric field
     x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
     phi_on_grid = 3 * x_grid.grid
-    interpolated_field = InterpolatedField(x_grid, phi_on_grid)
+    interpolated_field = InterpolatedField([x_grid], phi_on_grid)
     pts = [0, 0.5, 1]
     evaluated_field = interpolated_field.evaluate(pts)
     target_field = np.asarray([-3] * 3)
@@ -28,6 +30,7 @@ def test_interpolate_field_1D_linear_potential():
 
 
 def test_interpolate_field_2D_null_field():
+    # 2D test with zero electric field
     x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
     y_grid = x_grid
     phi_on_grid = np.ones((x_grid.size, y_grid.size))
@@ -39,6 +42,7 @@ def test_interpolate_field_2D_null_field():
 
 
 def test_interpolate_field_2D_linear_potential():
+    # 2D test with constant electric field
     x_grid = Uniform1DGrid(num_points=100, x_min=0, x_max=1)
     y_grid = x_grid
     xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
@@ -57,6 +61,7 @@ def test_interpolate_field_2D_linear_potential():
 
 
 def test_interpolate_field_2D_parabolic_potential():
+    # 2D test with parabolic potential - check numerical accuracy
     x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
     y_grid = x_grid
     xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
@@ -70,6 +75,7 @@ def test_interpolate_field_2D_parabolic_potential():
 
 
 def test_interpolate_field_2D_semiparabolic_potential():
+    # 2D test with semiparabolic potential - check numerical accuracy
     x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
     y_grid = x_grid
     xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
@@ -83,6 +89,7 @@ def test_interpolate_field_2D_semiparabolic_potential():
 
 
 def test_interpolate_field_asymmetric_grids_messy_potential():
+    # 2D test with somewhat nasty potential - check numerical accuracy
     x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
     y_grid = Uniform1DGrid(num_points=2000, x_min=-3, x_max=4)
     xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")

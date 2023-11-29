@@ -3,12 +3,37 @@
 from dataclasses import dataclass
 
 import numpy as np
+from numpy.typing import NDArray
+
+FArray = NDArray[np.float64]
+IArray = NDArray[np.int32]
 
 
 @dataclass(eq=False)
 class Particles:
-    # Note that the first index of any of these arrays specify the particle label.
-    charges: np.ndarray  # FIXME Must be 1D array of ints!
-    masses: np.ndarray  # FIXME Must be 1D array of positive floats!
-    positions: np.ndarray  # FIXME 2D, 1+ elements in second dimension
-    velocities: np.ndarray  # FIXME 2D, 1+ elements in second dimension
+    """
+    Store the data for a swarm of particles in a single object.
+    Every attribute is either a 1D or 2D NumPy array.
+    The first index specifies the particle number/label.
+    The second index, if it exists, specifies vector information
+    (see below for details).
+
+    Inputs:
+        charges(numpy.ndarray): 1D array of integers specifying the
+                                charge of each particle
+        masses(numpy.ndarray): 1D array of floats specifying the
+                               mass of each particle
+        positions(numpy.ndarray): 2D array of floats, with the second
+                                  index specifying the position (in
+                                  arbitrary-dimensional cartesian
+                                  coordinates) of a given particle
+        velocities(numpy.ndarray): 2D array of floats, with the second
+                                   index specifying the velocity (in
+                                   arbitrary-dimensional cartesian
+                                   coordinates) of a given particle
+    """
+
+    charges: IArray
+    masses: FArray
+    positions: FArray
+    velocities: FArray
