@@ -1,9 +1,10 @@
 """Functions to be used by Nox."""
 
-import nox
 import argparse
 
-nox.options.sessions = ["lint", "type", "test"]
+import nox
+
+nox.options.sessions = ["lint", "check_types", "test"]
 
 
 @nox.session
@@ -20,7 +21,7 @@ def lint(session: nox.Session) -> None:
 
 
 @nox.session
-def type(session: nox.Session) -> None:
+def check_types(session: nox.Session) -> None:
     """Run the type checker."""
     session.install("-e.[test]")
     session.install("mypy")
@@ -40,16 +41,25 @@ def build(session: nox.Session) -> None:
     session.install("build")
     session.run("python", "-m", "build")
 
+
 @nox.session(reuse_venv=True)
 def docs(session: nox.Session) -> None:
     """
-    Build the docs. Pass "--serve" to quickly preview the docs. Pass "-b linkcheck" to check links.
+    Build the docs.
+    Pass "--serve" to quickly preview the docs.
+    Pass "-b linkcheck" to check links.
     """
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--serve", action="store_true", help="Preview docs after building")
     parser.add_argument(
-        "-b", dest="builder", default="html", help="Build target (default: html)"
+        "--serve",
+        action="store_true",
+        help="Preview docs after building",
+    )
+    parser.add_argument(
+        "-b",
+        dest="builder",
+        default="html",
+        help="Build target (default: html)",
     )
     args, posargs = parser.parse_known_args(session.posargs)
 
@@ -72,7 +82,12 @@ def docs(session: nox.Session) -> None:
 
     if args.builder == "linkcheck":
         session.run(
-            "sphinx-build", "-b", "linkcheck", "source", "build/linkcheck", *posargs
+            "sphinx-build",
+            "-b",
+            "linkcheck",
+            "source",
+            "build/linkcheck",
+            *posargs,
         )
         return
 

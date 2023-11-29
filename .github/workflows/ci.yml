@@ -20,7 +20,7 @@ jobs:
       - run: pip install nox
 
       - run: nox -s lint
-  
+
   type:
     runs-on: ubuntu-latest
     steps:

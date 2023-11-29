@@ -1,4 +1,4 @@
-"""Defines ChargeWeightFunc, which allows charges to be weighted appropriately for deposition on the spatial grid."""
+"""Defines ``ChargeWeightFunc``, which allows charges to be weighted appropriately for deposition on the spatial grid."""
 
 import numpy as np
 

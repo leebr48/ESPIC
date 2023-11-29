@@ -1,10 +1,11 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../src/espic'))
 
-project = 'ESPIC'
-copyright = '2023, Patrick Kim and Brandon Lee'
-author = 'Patrick Kim and Brandon Lee'
+sys.path.insert(0, os.path.abspath("../../src/espic"))
+
+project = "ESPIC"
+copyright = "2023, Patrick Kim and Brandon Lee"
+author = "Patrick Kim and Brandon Lee"
 
 extensions = [
     "myst_parser",
@@ -17,7 +18,7 @@ extensions = [
 
 source_suffix = [".rst", ".md"]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 exclude_patterns = [
     "_build",
@@ -28,7 +29,7 @@ exclude_patterns = [
     ".venv",
 ]
 
-html_theme = 'furo'
+html_theme = "furo"
 
 myst_enable_extensions = [
     "colon_fence",
@@ -41,4 +42,4 @@ nitpick_ignore = [
 
 always_document_param_types = True
 
-html_static_path = ['_static']
+html_static_path = ["_static"]

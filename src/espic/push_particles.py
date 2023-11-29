@@ -1,30 +1,39 @@
-"""Implements ParticlePusher class, which evolves particle positions and velocities forward one time step."""
+"""
+Implements the ``ParticlePusher`` class, which evolves
+particle positions and velocities forward one time step.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from espic.def_particles import Particles
-from espic.interp_field import InterpolatedField
+if TYPE_CHECKING:
+    from espic.def_particles import Particles
+    from espic.interp_field import InterpolatedField
 
 
 class ParticlePusher:
     """
-    Evolves particles one timestep at a time.
+    Evolves particles one time step at a time.
 
-    Inputs:
-        particles(Particles): Instance of the Particles class containing all particles
-                              to be moved.
-        electric_field(InterpolatedField): Instance of the InterpolatedField class
-                                           containing the field that will move the
-                                           particles.
-        dt(float): Time step for Euler integration.
-
-    Methods
-    -------
-        evolve: Evolve the particle positions and velocities forward one time step.
+    Parameters
+    ----------
+    particles
+        ``Particles`` object containing all particles to be moved.
+    electric_field
+        ``InterpolatedField`` object containing the field that will
+        accelerate the particles.
+    dt
+        Time step for Euler integration.
     """
 
     def __init__(
-        self, particles: Particles, electric_field: InterpolatedField, dt: float = 1e-2
+        self,
+        particles: Particles,
+        electric_field: InterpolatedField,
+        dt: float = 1e-2,
     ):
         self.particles = particles
         self.E = electric_field
@@ -33,11 +42,14 @@ class ParticlePusher:
     def evolve(self, dt: float | None = None) -> None:
         """
         Evolve the particle positions and velocities forward one time step.
-        These attributes are modified in-place.
+        These attributes are modified in-place (that is, in the ``particles``
+        attribute of this class).
 
-        Inputs:
-            dt(float or None): If None, use the dt assigned at class instantiation.
-                               Otherwise, use the specified float.
+        Parameters
+        ----------
+        dt
+            If None, use the ``dt`` assigned at class instantiation.
+            Otherwise, use the specified value.
         """
         if dt is None:
             dt = self.dt

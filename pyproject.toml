@@ -50,10 +50,21 @@ select = [
   "ALL",
 ]
 ignore = [
+  "ANN101",
   "D203",
+  "D205",
+  "D107",
   "D212",
+  "S101",
 ]
 src = ["src"]
+exclude = ["docs", "tests"]
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+
+[tool.ruff.lint.pylint]
+max-args = 6
 
 [tool.mypy]
 mypy_path = './src'

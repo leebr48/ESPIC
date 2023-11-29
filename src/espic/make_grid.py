@@ -1,49 +1,74 @@
-"""Defines Uniform1DGrid, which sets up a one-dimensional spatial grid, and Uniform2DGrid, which sets up a two-dimensional spatial grid."""
+"""
+Defines ``Uniform1DGrid``, which sets up a one-dimensional spatial grid,
+and ``Uniform2DGrid``, which sets up a two-dimensional spatial grid.
+"""
+
+from __future__ import annotations
+
+from functools import cached_property
 
 import numpy as np
+from numpy.typing import NDArray
+
+FArray = NDArray[np.float64]
 
 
 class Uniform1DGrid:
     """
-    Creates a 1D spatial grid with uniform spacing.
+    Creates a one-dimensional spatial grid with uniform spacing.
 
-    Inputs:
-        num_points(int): Number of grid points.
-        x_min(float): Least extent of the grid.
-        x_max(float): Greatest extent of the grid.
-
-    Derived Attributes:
-        grid(np.ndarray): The coordinates of the spatial grid nodes.
-        size(int): Number of elements in grid.
-        shape(tuple): Dimensions of each axis of grid.
+    Parameters
+    ----------
+    num_points
+        Number of grid points.
+    x_min
+        Least extent of the grid.
+    x_max
+        Greatest extent of the grid.
     """
 
     def __init__(
-        self, num_points: int = 100, x_min: float = -1, x_max: float = 1
+        self,
+        num_points: int = 100,
+        x_min: float = -1,
+        x_max: float = 1,
     ) -> None:
         self.num_points = num_points
         self.x_min = x_min
         self.x_max = x_max
-        self.grid = np.linspace(self.x_min, self.x_max, self.num_points)
-        self.size = self.grid.size
-        self.shape = self.grid.shape
+
+    @cached_property
+    def grid(self) -> FArray:
+        """The coordinates of the spatial grid nodes."""
+        return np.linspace(self.x_min, self.x_max, self.num_points)
+
+    @cached_property
+    def size(self) -> int:
+        """Number of elements in ``grid``."""
+        return self.grid.size
+
+    @cached_property
+    def shape(self) -> tuple[int, ...]:
+        """Dimension of ``grid``."""
+        return self.grid.shape
 
 
 class Uniform2DGrid:
     """
-    Creates a 2D spatial grid with uniform spacing in each dimension.
+    Creates a two-dimensional spatial grid with uniform spacing.
 
-    Inputs:
-        num_points(int): Number of grid points for each dimension.
-        x_min(float): Least extent of the first grid.
-        x_max(float): Greatest extent of the first grid.
-        y_min(float): Least extent of the second grid.
-        y_max(float): Greatest extent of the second grid.
-
-    Derived Attributes:
-        grid(np.ndarray): The coordinates of the spatial grid nodes.
-        size(int): Number of elements in grid.
-        shape(tuple): Dimensions of each axis of grid.
+    Parameters
+    ----------
+    num_points
+        Number of grid points for each dimension.
+    x_min
+        Least extent of the first grid.
+    x_max
+        Greatest extent of the first grid.
+    y_min
+        Least extent of the second grid.
+    y_max
+        Greatest extent of the second grid.
     """
 
     def __init__(
@@ -59,13 +84,28 @@ class Uniform2DGrid:
         self.x_max = x_max
         self.y_min = y_min
         self.y_max = y_max
-        self.x_grid = np.linspace(self.x_min, self.x_max, self.num_points)
-        self.y_grid = np.linspace(self.y_min, self.y_max, self.num_points)
-        self.grid = np.meshgrid(self.x_grid, self.y_grid)
-        self.size = (
-            self.x_grid.size * self.y_grid.size
-        )  # FIXME why not take from grid directly?
-        self.shape = (
-            self.x_grid.shape,
-            self.y_grid.shape,
-        )  # FIXME why not take from grid directly? Even if not, why use a tuple of tuples?
+
+    @cached_property
+    def x_grid(self) -> FArray:
+        """The coordinates of the spatial nodes of the first grid."""
+        return np.linspace(self.x_min, self.x_max, self.num_points)
+
+    @cached_property
+    def y_grid(self) -> FArray:
+        """The coordinates of the spatial nodes of the second grid."""
+        return np.linspace(self.y_min, self.y_max, self.num_points)
+
+    @cached_property
+    def grid(self) -> list[FArray]:
+        """The coordinates of the spatial grid nodes in 2D."""
+        return np.meshgrid(self.x_grid, self.y_grid, indexing="ij")
+
+    @cached_property
+    def size(self) -> int:
+        """Number of elements in ``grid``."""
+        return self.x_grid.size * self.y_grid.size
+
+    @cached_property
+    def shape(self) -> tuple[int, ...]:
+        """Dimensions of each axis of ``grid``."""
+        return (self.x_grid.shape[0], self.y_grid.shape[0])
