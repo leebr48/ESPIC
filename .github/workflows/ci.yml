@@ -50,6 +50,8 @@ jobs:
 
       - run: nox -s test
 
+name: MakeDocs
+
 on:
   push:
     branches:
