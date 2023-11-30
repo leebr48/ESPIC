@@ -55,7 +55,7 @@ class Uniform1DGrid:
     @cached_property
     def delta(self) -> float:
         """Spacing between grid points."""
-        return self.grid[1] - self.grid[0]
+        return float(self.grid[1] - self.grid[0])
 
 
 class Uniform2DGrid:
@@ -118,4 +118,4 @@ class Uniform2DGrid:
     @cached_property
     def delta(self) -> float:
         """Spacing between grid points."""
-        return self.x_grid[1] - self.x_grid[0]
+        return float(self.x_grid[1] - self.x_grid[0])

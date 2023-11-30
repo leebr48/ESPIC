@@ -43,7 +43,7 @@ def test_2d_laplace():
         "left": V0 * np.ones(N),
         "right": V0 * np.ones(N),
     }
-    ms = MaxwellSolver2D(grid=grid, boundary_conditions=boundary_conditions)
+    ms = MaxwellSolver2D(boundary_conditions=boundary_conditions, grid=grid)
     rho = np.zeros(ms.grid[0].shape)
 
     phi = ms.solve(rho)
@@ -90,7 +90,7 @@ def test_2d_poisson_uniform():
         "left": bc_left,
         "right": bc_right,
     }
-    ms = MaxwellSolver2D(grid=grid, boundary_conditions=boundary_conditions)
+    ms = MaxwellSolver2D(boundary_conditions=boundary_conditions, grid=grid)
     rho = np.ones(ms.grid[0].shape)
 
     phi = ms.solve(rho)

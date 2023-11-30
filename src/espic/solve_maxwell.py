@@ -1,19 +1,29 @@
 """Defines MaxwellSolver1D, which calculates the electric field on the spatial grid."""
+from __future__ import annotations
+
+from functools import cached_property
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.linalg import solve, solve_banded
 
 from espic.make_grid import Uniform1DGrid, Uniform2DGrid
 
+FArray = NDArray[np.float64]
+
 
 class MaxwellSolver1D:
-    def __init__(self, grid=Uniform1DGrid(), boundary_conditions=np.zeros(2)):
+    def __init__(
+        self,
+        boundary_conditions: FArray = np.zeros(2),
+        grid: Uniform1DGrid = Uniform1DGrid(),
+    ) -> None:
         self.grid = grid.grid
         self.boundary_conditions = boundary_conditions
         self.phi = np.zeros(len(self.grid))
 
     # Centered differences. FIXME should we make it arbitrary?
-    def solve(self, rho):
+    def solve(self, rho: FArray) -> FArray:
         delta = self.grid[1] - self.grid[0]
         dim = len(self.grid) - 2
         phi = np.zeros(len(self.grid))
@@ -39,11 +49,14 @@ class MaxwellSolver1D:
 # Code taken from https://john-s-butler-dit.github.io/NumericalAnalysisBook/Chapter%2009%20-%20Elliptic%20Equations/903_Poisson%20Equation-Boundary.html
 # FIXME: for now, this assumes equal spacing in x and y.
 class MaxwellSolver2D:
-    def __init__(self, grid=Uniform2DGrid(), boundary_conditions=None):
+    def __init__(
+        self,
+        boundary_conditions: dict[str, FArray] | None = None,
+        grid: Uniform2DGrid = Uniform2DGrid(),
+    ) -> None:
         self.grid = grid.grid
         self.x_grid = grid.x_grid
         self.y_grid = grid.y_grid
-
         if boundary_conditions is None:
             N = len(self.x_grid)
             boundary_conditions = {
@@ -56,10 +69,12 @@ class MaxwellSolver2D:
         self.boundary_conditions = boundary_conditions
         self.phi = np.zeros((len(self.grid), len(self.grid)))
 
+    @cached_property
+    def A(self) -> FArray:
         # It's better to set A in the initialization, since it doesn't change over time.
-        self.A = self.set_A(len(self.x_grid))
+        return self.set_A(len(self.x_grid))
 
-    def set_A(self, N):
+    def set_A(self, N: int) -> FArray:
         N2 = (N - 2) * (N - 2)
         A = np.zeros((N2, N2))
         ## Diagonal
@@ -88,7 +103,7 @@ class MaxwellSolver2D:
 
         return A
 
-    def set_rhs(self, N, h, rho, bc):
+    def set_rhs(self, N: int, h: float, rho: FArray, bc: dict[str, FArray]) -> FArray:
         N2 = (N - 2) * (N - 2)
         #        rho = np.ones((N-1,N-1))
         rho = rho[1:-1, 1:-1]
@@ -115,7 +130,7 @@ class MaxwellSolver2D:
         rhs = r - b
         return rhs
 
-    def solve(self, rho):
+    def solve(self, rho: FArray) -> FArray:
         gridsize = len(self.x_grid)
         h = self.x_grid[1] - self.x_grid[0]
         rhs = self.set_rhs(gridsize, h, rho, self.boundary_conditions)

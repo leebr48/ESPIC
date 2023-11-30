@@ -1,27 +1,36 @@
 """Defines ChargeDeposition class, which places charges at float positions on the spatial grid."""
 
-import numpy as np
+from __future__ import annotations
 
-from espic.make_grid import Uniform1DGrid
+import numpy as np
+from numpy.typing import NDArray
+
+from espic.make_grid import Uniform1DGrid, Uniform2DGrid
 from espic.make_weight_func import ChargeWeightFunc
+
+FArray = NDArray[np.float64]
 
 
 class ChargeDeposition:
-    def __init__(self, shape_func="zeroth_order", grid=Uniform1DGrid()):
+    def __init__(
+        self,
+        shape_func: str = "zeroth_order",
+        grid: Uniform1DGrid | Uniform2DGrid = Uniform1DGrid(),
+    ) -> None:
         self.shape_func = shape_func
         self.grid = grid
 
-    def return_coords(self, grid):
+    def return_coords(self, grid: Uniform1DGrid | Uniform2DGrid) -> FArray:
         if len(self.grid.shape) == 1:
-            coords = self.grid.grid.reshape((len(self.grid.grid), 1))
+            coords = np.array(self.grid.grid).reshape((len(self.grid.grid), 1))
         else:
-            c = ()
+            c: tuple[FArray, ...] = ()
             for i in range(len(self.grid.grid)):
                 c = c + (self.grid.grid[len(self.grid.grid) - (i + 1)].ravel(),)
             coords = np.column_stack(c)
         return coords
 
-    def deposit(self, q_arr, pos_arr):
+    def deposit(self, q_arr: FArray, pos_arr: FArray) -> FArray:
         if len(pos_arr.shape) == 1:
             pos_arr = pos_arr.reshape((len(pos_arr), 1))
         else:
