@@ -100,3 +100,19 @@ def test_interpolate_field_asymmetric_grids_messy_potential():
     target_field = np.asarray([[-6.5, 3], [1, 1.5], [-1, 7]])
 
     assert np.allclose(evaluated_field, target_field)
+
+
+def test_interpolate_field_updater():
+    # 2D test with semiparabolic potential - check you can update the potential properly
+    x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
+    zz = xx**2 - 2 * yy**2
+    interpolated_field = InterpolatedField([x_grid, y_grid], zz)
+    new_zz = 2 * xx**2 - 3 * yy**2
+    interpolated_field.update_potential(new_zz)
+    pts = [[0, 0], [-1, 1], [1.5, -1.5], [0.5, 1]]
+    evaluated_field = interpolated_field.evaluate(pts)
+    target_field = np.asarray([[0, 0], [4, 6], [-6, -9], [-2, 6]])
+
+    assert np.allclose(evaluated_field, target_field)

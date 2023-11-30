@@ -35,7 +35,8 @@ while t < tm:
     particle_pusher.evolve()
 
     rho = cd.deposit(
-        particle_pusher.particles.charges, particle_pusher.particles.positions
+        particle_pusher.particles.charges,
+        particle_pusher.particles.positions,
     )
     phi = ms.solve(rho)
     efield = InterpolatedField(grids=[grid], phi_on_grid=phi)

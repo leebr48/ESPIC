@@ -10,8 +10,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from espic.def_particles import Particles
     from espic.interp_field import InterpolatedField
+
+    FArray = NDArray[np.float64]
 
 
 class ParticlePusher:
@@ -62,3 +66,29 @@ class ParticlePusher:
         )
         self.particles.positions = self.particles.positions + dx
         self.particles.velocities = self.particles.velocities + dv
+
+    def update_field(self, new_electric_field: InterpolatedField) -> None:
+        """
+        Update the electric field that accelerates the particles.
+
+        Parameters
+        ----------
+        new_electric_field
+            The new field to be used.
+        """
+        self.E = new_electric_field
+
+    def update_potential(self, new_phi_on_grid: FArray) -> None:
+        """
+        Update the electric potential used to derive the electric
+        field that accelerates the particles. This is essentially
+        the same as ``update_field``, but you do not need to
+        generate a new ``InterpolatedField`` object on your
+        own.
+
+        Parameters
+        ----------
+        new_phi_on_grid
+            The new potential to be used.
+        """
+        self.E.update_potential(new_phi_on_grid)

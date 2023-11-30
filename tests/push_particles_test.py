@@ -116,3 +116,50 @@ def test_dt_change():
     particle_pusher.evolve(dt=dt_new)
 
     assert np.allclose(particle_pusher.particles.positions, pos + vel * dt_new)
+
+
+def test_push_update_field():
+    # Particles move in 2D under influence of semiparabolic potential - test field update
+    qs = np.asarray([2, -1])
+    ms = np.asarray([5, 2])
+    positions = np.asarray([[0.5, -0.25], [0.25, 1]])
+    velocities = np.asarray([[2, -1], [-1.5, 0.25]])
+    x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
+    zz = xx**2 - 2 * yy**2
+    dt = 1e-2
+    particles = Particles(qs, ms, positions, velocities)
+    interpolated_field = InterpolatedField([x_grid, y_grid], zz)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    new_zz = 2 * xx**2 - 3 * yy**2
+    interpolated_field.update_potential(new_zz)
+    particle_pusher.update_field(interpolated_field)
+    pts = [[0, 0], [-1, 1], [1.5, -1.5], [0.5, 1]]
+    evaluated_field = particle_pusher.E.evaluate(pts)
+    target_field = np.asarray([[0, 0], [4, 6], [-6, -9], [-2, 6]])
+
+    assert np.allclose(evaluated_field, target_field)
+
+
+def test_push_update_potential():
+    # Particles move in 2D under influence of semiparabolic potential - test potential update
+    qs = np.asarray([2, -1])
+    ms = np.asarray([5, 2])
+    positions = np.asarray([[0.5, -0.25], [0.25, 1]])
+    velocities = np.asarray([[2, -1], [-1.5, 0.25]])
+    x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
+    zz = xx**2 - 2 * yy**2
+    dt = 1e-2
+    particles = Particles(qs, ms, positions, velocities)
+    interpolated_field = InterpolatedField([x_grid, y_grid], zz)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    new_zz = 2 * xx**2 - 3 * yy**2
+    particle_pusher.update_potential(new_zz)
+    pts = [[0, 0], [-1, 1], [1.5, -1.5], [0.5, 1]]
+    evaluated_field = particle_pusher.E.evaluate(pts)
+    target_field = np.asarray([[0, 0], [4, 6], [-6, -9], [-2, 6]])
+
+    assert np.allclose(evaluated_field, target_field)

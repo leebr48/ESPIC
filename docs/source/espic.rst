@@ -33,6 +33,14 @@ espic.deposit\_charge module
    :undoc-members:
    :show-inheritance:
 
+espic.driver module
+-------------------
+
+.. automodule:: espic.driver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 espic.init\_charges module
 --------------------------
 
