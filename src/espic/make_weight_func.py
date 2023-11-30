@@ -1,4 +1,4 @@
-"""Create weight functions for charge and electric field."""  # FIXME add classes to comment.
+"""Defines ``ChargeWeightFunc``, which allows charges to be weighted appropriately for deposition on the spatial grid."""
 
 import numpy as np
 
