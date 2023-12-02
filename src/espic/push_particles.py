@@ -31,6 +31,14 @@ class ParticlePusher:
         accelerate the particles.
     dt
         Time step for Euler integration.
+    omega_p
+        Plasma frequency in inverse seconds.
+    c
+        Speed of light in meters per second.
+    normalize
+        If False, perform calculations in "raw" units. If True,
+        normalize equations using the natural units specified
+        by ``omega_p`` and ``c``.
     """
 
     def __init__(
