@@ -38,10 +38,17 @@ class ParticlePusher:
         particles: Particles,
         electric_field: InterpolatedField,
         dt: float = 1e-2,
+        omega_p: float = 1,
+        c: float = 1,
+        normalize: bool = False,
     ):
         self.particles = particles
         self.E = electric_field
         self.dt = dt
+        self.normalize = normalize
+
+        self.omega_p = omega_p
+        self.c = c
 
     def evolve(self, dt: float | None = None) -> None:
         """
@@ -64,6 +71,8 @@ class ParticlePusher:
             * self.E.evaluate(self.particles.positions)
             * dt
         )
+        if self.normalize:
+            dv *= 1 / (self.omega_p * self.c)
         self.particles.positions = self.particles.positions + dx
         self.particles.velocities = self.particles.velocities + dv
 
