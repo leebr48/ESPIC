@@ -71,6 +71,8 @@ class ParticlePusher:
             * self.E.evaluate(self.particles.positions)
             * dt
         )
+        # Normalization introduces 1/(omega_p * c)
+        # But to go from E_n to E, need to multiply by (c/omega_p)**2 (tracking normalizations from phi)
         if self.normalize:
             dv *= 1 / (self.omega_p * self.c)
         self.particles.positions = self.particles.positions + dx

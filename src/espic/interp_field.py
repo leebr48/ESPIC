@@ -36,9 +36,19 @@ class InterpolatedField:
         the ``indexing='ij'`` option **must** be used.
     """
 
-    def __init__(self, grids: list[Uniform1DGrid], phi_on_grid: FArray):
+    def __init__(
+        self,
+        grids: list[Uniform1DGrid],
+        phi_on_grid: FArray,
+        omega_p: float = 1,
+        c: float = 1,
+        normalize: bool = False,
+    ):
         self.grids = [g.grid for g in grids]
         self.phi_on_grid = phi_on_grid
+        self.omega_p = omega_p
+        self.c = c
+        self.normalize = normalize
 
     @property
     def e_on_grid(self) -> list[FArray]:
@@ -53,8 +63,22 @@ class InterpolatedField:
         """
         # We need to ensure that e_on_grid is a list of arrays
         if len(self.grids) == 1:
-            return [-1 * np.gradient(self.phi_on_grid, *self.grids)]
-        return [-1 * ar for ar in np.gradient(self.phi_on_grid, *self.grids)]
+            if self.normalize:
+                efield = [
+                    -self.c / self.omega_p * np.gradient(self.phi_on_grid, *self.grids)
+                ]
+                return efield
+            else:
+                return [-1 * np.gradient(self.phi_on_grid, *self.grids)]
+
+        if self.normalize:
+            efield = [
+                -self.c / self.omega_p * ar
+                for ar in np.gradient(self.phi_on_grid, *self.grids)
+            ]
+            return efield
+        else:
+            return [-1 * ar for ar in np.gradient(self.phi_on_grid, *self.grids)]
 
     @property
     def interpolated_e(self) -> list[Callable[[ArrayLike], FArray]]:

@@ -17,10 +17,16 @@ class MaxwellSolver1D:
         self,
         boundary_conditions: FArray = np.zeros(2),
         grid: Uniform1DGrid = Uniform1DGrid(),
+        omega_p: float = 1,
+        c: float = 1,
+        normalize: bool = False,
     ) -> None:
         self.grid = grid.grid
         self.boundary_conditions = boundary_conditions
         self.phi = np.zeros(len(self.grid))
+        self.omega_p = omega_p
+        self.c = c
+        self.normalize = normalize
 
     # Centered differences. FIXME should we make it arbitrary?
     def solve(self, rho: FArray) -> FArray:
@@ -43,7 +49,10 @@ class MaxwellSolver1D:
 
         phi[1:-1] = solve_banded((1, 1), bands, rhs)
 
-        return phi
+        if self.normalize:
+            return self.c / self.omega_p * phi
+        else:
+            return phi
 
 
 # Code taken from https://john-s-butler-dit.github.io/NumericalAnalysisBook/Chapter%2009%20-%20Elliptic%20Equations/903_Poisson%20Equation-Boundary.html
