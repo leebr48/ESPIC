@@ -163,3 +163,20 @@ def test_push_update_potential():
     target_field = np.asarray([[0, 0], [4, 6], [-6, -9], [-2, 6]])
 
     assert np.allclose(evaluated_field, target_field)
+
+
+def test_push_1D_linear_potential_multiparticle_enforce_boundary(): # FIXME maybe make 2D if 1D works - another func?
+    # Particles move in 1D under influence of a constant electric field
+    qs = np.asarray([2, 5])
+    ms = np.asarray([5, 2])
+    positions = np.asarray([[0.99], [0.01]])
+    velocities = np.asarray([[2], [-2]])
+    x_grid = Uniform1DGrid(num_points=100, x_min=0, x_max=1)
+    phi_on_grid = 3 * x_grid.grid
+    dt = 1e-2
+    particles = Particles(qs, ms, positions, velocities)
+    interpolated_field = InterpolatedField([x_grid], phi_on_grid)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    particle_pusher.evolve()
+
+    assert np.allclose(particle_pusher.particles.positions, np.asarray([[1], [0]]))

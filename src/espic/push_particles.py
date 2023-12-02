@@ -83,6 +83,7 @@ class ParticlePusher:
             dv *= 1 / (self.omega_p * self.c)
         self.particles.positions = self.particles.positions + dx
         self.particles.velocities = self.particles.velocities + dv
+        self.enforce_boundaries()
 
     def update_field(self, new_electric_field: InterpolatedField) -> None:
         """
@@ -109,3 +110,18 @@ class ParticlePusher:
             The new potential to be used.
         """
         self.E.update_potential(new_phi_on_grid)
+
+    def enforce_boundaries(self) -> None:
+        # FIXME add note
+        # FIXME clean this up
+        # FIXME test
+        mins = [np.min(ar) for ar in self.E.grids]
+        maxes = [np.max(ar) for ar in self.E.grids]
+        for i, min_val in enumerate(mins):
+            inds = (np.argwhere(self.particles.positions[:, i] <= min_val).flatten(), i)
+            self.particles.positions[inds] = min_val
+            self.particles.velocities[inds] *= -1
+        for i, max_val in enumerate(maxes):
+            inds = (np.argwhere(self.particles.positions[:, i] >= max_val).flatten(), i)
+            self.particles.positions[inds] = max_val
+            self.particles.velocities[inds] *= -1
