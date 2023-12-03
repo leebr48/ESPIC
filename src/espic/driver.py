@@ -37,9 +37,9 @@ for i in range(len(init_speed)):
 masses = m * np.ones(num_particles)
 x_min = -10
 x_max = 10
-t_max = 1
-dt = 1 / omega_p
+dt = 1 / (omega_p)
 t = 0
+t_max = 400 / omega_p
 init_amp = 0.2
 
 init_pos = np.random.uniform(low=x_min / 2, high=x_max / 2, size=num_particles)
@@ -92,6 +92,11 @@ while t < t_max:
     particle_pusher.update_potential(phi)
 
     t += dt
+
+# %% Compute fft
+phi_v_time_arr = np.array(phi_v_time)
+phi_fft = np.abs(np.fft.fft2(phi_v_time_arr))
+
 
 # %% Make animation
 

@@ -5,6 +5,7 @@ from functools import cached_property
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.constants import epsilon_0
 from scipy.linalg import solve, solve_banded
 
 from espic.make_grid import Uniform1DGrid, Uniform2DGrid
@@ -45,7 +46,8 @@ class MaxwellSolver1D:
         bc = np.zeros(dim)
         bc[0] = self.boundary_conditions[0]
         bc[-1] = self.boundary_conditions[1]
-        rhs = -4 * np.pi * delta**2 * rho + bc
+        # rhs = -4 * np.pi * delta**2 * rho + bc
+        rhs = -(delta**2) * rho / epsilon_0 + bc
 
         phi[1:-1] = solve_banded((1, 1), bands, rhs)
 
