@@ -4,7 +4,6 @@ import numpy as np
 
 # %% Initialize Physical Parameters
 import scipy.constants as sc
-from scipy.stats import maxwell
 
 from espic.def_particles import Particles
 from espic.deposit_charge import ChargeDeposition
@@ -26,7 +25,8 @@ vthp = a
 
 # %% Initialize distribution of particles
 
-init_speed = maxwell.rvs(size=num_particles, scale=vthp)
+# init_speed = maxwell.rvs(size=num_particles, scale=vthp)
+init_speed = np.zeros(num_particles)
 init_vel = np.zeros(len(init_speed))
 for i in range(len(init_speed)):
     if i % 2 == 0:
@@ -40,10 +40,10 @@ x_max = 10
 t_max = 1
 dt = 1 / omega_p
 t = 0
-init_amp = 1
+init_amp = 0.2
 
-init_pos = np.random.uniform(low=x_min, high=x_max, size=num_particles)
-charges = q * init_amp * np.sin(init_pos / 4)
+init_pos = np.random.uniform(low=x_min / 2, high=x_max / 2, size=num_particles)
+charges = q * init_amp * np.sin(init_pos / 2)
 
 init_vel = init_vel.reshape((len(init_vel), 1))
 init_pos = init_pos.reshape((len(init_pos), 1))
@@ -66,11 +66,16 @@ ms = MaxwellSolver1D(
 phi = ms.solve(rho)
 init_phi = ms.solve(rho)
 efield = InterpolatedField(
-    grids=[grid], phi_on_grid=phi, omega_p=omega_p, c=sc.c, normalize=True
+    grids=[grid],
+    phi_on_grid=phi,
+    omega_p=omega_p,
+    c=sc.c,
+    normalize=True,
 )
 particle_pusher = ParticlePusher(particles, efield, dt, omega_p, sc.c, normalize=True)
 
 phi_v_time = ()
+rho_v_time = ()
 
 while t < t_max:
     particle_pusher.evolve()
@@ -82,12 +87,33 @@ while t < t_max:
     phi = ms.solve(rho)
 
     phi_v_time += (phi,)
+    rho_v_time += (rho,)
 
     particle_pusher.update_potential(phi)
 
     t += dt
 
-# %% Run simulation
+# %% Make animation
+
+import matplotlib.pyplot as plt
+from matplotlib import animation
+
+writer = animation.FFMpegWriter(fps=5)
+# writer = Writer(fps=5, metadata=dict(artist='Me'), bitrate=1800)
+
+phi_v_time_arr = np.array(phi_v_time)
+fig = plt.figure()
+
+
+def animate(i):
+    plt.plot(grid.grid, phi_v_time[i])
+
+
+ani = animation.FuncAnimation(fig, animate, frames=len(phi_v_time_arr), repeat=True)
+
+writervideo = animation.FFMpegWriter(fps=5)
+ani.save("phi_v_time.mp4", writer=writervideo)
+plt.show()
 
 
 # %%
@@ -137,6 +163,6 @@ while t < tm:
     rho_t += (rho,)
     phi_t += (phi,)
     efield_t.append(
-        efield.evaluate(grid.grid) * np.hanning(tm / dt).reshape((int(tm / dt), 1))
+        efield.evaluate(grid.grid) * np.hanning(tm / dt).reshape((int(tm / dt), 1)),
     )
     t += dt
