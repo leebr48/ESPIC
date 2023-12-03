@@ -1,4 +1,6 @@
 # Initial stab at 1D PIC code
+# FIXME formalize all this once it's ready, then put 1D and 2D
+# examples in an 'examples' directory in root
 
 import numpy as np
 
