@@ -112,9 +112,15 @@ class ParticlePusher:
         self.E.update_potential(new_phi_on_grid)
 
     def enforce_boundaries(self) -> None:
-        # FIXME add note
-        # FIXME clean this up
-        # FIXME test
+        """
+        Enforce reflecting boundary conditions for all particles in 
+        ``particles``. Whenever a particle crosses outside the
+        boundaries specified by one of the ``grids`` of ``electric_field``,
+        it is instead placed on the appropriate boundary of the grid and
+        the component of the velocity associated with that grid is
+        reversed. This function will typically not be called directly,
+        but it is available in case the need arises.
+        """
         mins = [np.min(ar) for ar in self.E.grids]
         maxes = [np.max(ar) for ar in self.E.grids]
         for i, min_val in enumerate(mins):
