@@ -113,7 +113,7 @@ class ParticlePusher:
 
     def enforce_boundaries(self) -> None:
         """
-        Enforce reflecting boundary conditions for all particles in 
+        Enforce reflecting boundary conditions for all particles in
         ``particles``. Whenever a particle crosses outside the
         boundaries specified by one of the ``grids`` of ``electric_field``,
         it is instead placed on the appropriate boundary of the grid and

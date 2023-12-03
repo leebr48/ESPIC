@@ -198,6 +198,6 @@ def test_push_2D_linear_potential_multiparticle_enforce_boundary():
     interpolated_field = InterpolatedField([x_grid, y_grid], phi_on_grid)
     particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
     particle_pusher.evolve()
-    
+
     assert np.allclose(particle_pusher.particles.positions, np.asarray([[1, 0], [0, 1]]))
     assert np.allclose(particle_pusher.particles.velocities, np.asarray([[-1.988, 2.012], [2.075, -1.925]]))
