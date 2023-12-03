@@ -12,8 +12,8 @@ def test_push_1D_null_field():
     # Simplest possible test - one particle moves in straight lines
     q = np.asarray([2])
     m = np.asarray([5.5])
-    pos = np.asarray([0.5])
-    vel = np.asarray([-2])
+    pos = np.asarray([[0.5]])
+    vel = np.asarray([[-2]])
     x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
     phi_on_grid = np.ones(x_grid.size)
     dt = 1e-2
@@ -29,8 +29,8 @@ def test_push_1D_linear_potential():
     # Particle moves in 1D under influence of a constant electric field
     q = np.asarray([2])
     m = np.asarray([5])
-    pos = np.asarray([0.5])
-    vel = np.asarray([2])
+    pos = np.asarray([[0.5]])
+    vel = np.asarray([[2]])
     x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
     phi_on_grid = 3 * x_grid.grid
     dt = 1e-2
@@ -104,8 +104,8 @@ def test_dt_change():
     # Check that time step override is working properly
     q = np.asarray([2])
     m = np.asarray([5.5])
-    pos = np.asarray([0.5])
-    vel = np.asarray([-2])
+    pos = np.asarray([[0.5]])
+    vel = np.asarray([[-2]])
     x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
     phi_on_grid = np.ones(x_grid.size)
     dt = 1e-2
@@ -163,3 +163,41 @@ def test_push_update_potential():
     target_field = np.asarray([[0, 0], [4, 6], [-6, -9], [-2, 6]])
 
     assert np.allclose(evaluated_field, target_field)
+
+
+def test_push_1D_linear_potential_multiparticle_enforce_boundary():
+    # Particles move in 1D under influence of a constant electric field - ensure BCs are enforced properly
+    qs = np.asarray([2, 5])
+    ms = np.asarray([5, 2])
+    positions = np.asarray([[0.99], [0.01]])
+    velocities = np.asarray([[2], [-2]])
+    x_grid = Uniform1DGrid(num_points=100, x_min=0, x_max=1)
+    phi_on_grid = 3 * x_grid.grid
+    dt = 1e-2
+    particles = Particles(qs, ms, positions, velocities)
+    interpolated_field = InterpolatedField([x_grid], phi_on_grid)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    particle_pusher.evolve()
+
+    assert np.allclose(particle_pusher.particles.positions, np.asarray([[1], [0]]))
+    assert np.allclose(particle_pusher.particles.velocities, np.asarray([[-1.988], [2.075]]))
+
+
+def test_push_2D_linear_potential_multiparticle_enforce_boundary():
+    # Particles move in 2D under influence of linear potential - ensure BCs are enforced properly
+    qs = np.asarray([2, 5])
+    ms = np.asarray([5, 2])
+    positions = np.asarray([[0.99, 0.01], [0.01, 0.99]])
+    velocities = np.asarray([[2, -2], [-2, 2]])
+    x_grid = Uniform1DGrid(num_points=100, x_min=0, x_max=1)
+    y_grid = x_grid
+    xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
+    phi_on_grid = 3 * xx + 3 * yy
+    dt = 1e-2
+    particles = Particles(qs, ms, positions, velocities)
+    interpolated_field = InterpolatedField([x_grid, y_grid], phi_on_grid)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    particle_pusher.evolve()
+
+    assert np.allclose(particle_pusher.particles.positions, np.asarray([[1, 0], [0, 1]]))
+    assert np.allclose(particle_pusher.particles.velocities, np.asarray([[-1.988, 2.012], [2.075, -1.925]]))

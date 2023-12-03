@@ -31,6 +31,14 @@ class ParticlePusher:
         accelerate the particles.
     dt
         Time step for Euler integration.
+    omega_p
+        Plasma frequency in inverse seconds.
+    c
+        Speed of light in meters per second.
+    normalize
+        If False, perform calculations in "raw" units. If True,
+        normalize equations using the natural units specified
+        by ``omega_p`` and ``c``.
     """
 
     def __init__(
@@ -77,6 +85,7 @@ class ParticlePusher:
             dv *= 1 / (self.omega_p * self.c)
         self.particles.positions = self.particles.positions + dx
         self.particles.velocities = self.particles.velocities + dv
+        self.enforce_boundaries()
 
     def update_field(self, new_electric_field: InterpolatedField) -> None:
         """
@@ -103,3 +112,24 @@ class ParticlePusher:
             The new potential to be used.
         """
         self.E.update_potential(new_phi_on_grid)
+
+    def enforce_boundaries(self) -> None:
+        """
+        Enforce reflecting boundary conditions for all particles in
+        ``particles``. Whenever a particle crosses outside the
+        boundaries specified by one of the ``grids`` of ``electric_field``,
+        it is instead placed on the appropriate boundary of the grid and
+        the component of the velocity associated with that grid is
+        reversed. This function will typically not be called directly,
+        but it is available in case the need arises.
+        """
+        mins = [np.min(ar) for ar in self.E.grids]
+        maxes = [np.max(ar) for ar in self.E.grids]
+        for i, min_val in enumerate(mins):
+            inds = (np.argwhere(self.particles.positions[:, i] <= min_val).flatten(), i)
+            self.particles.positions[inds] = min_val
+            self.particles.velocities[inds] *= -1
+        for i, max_val in enumerate(maxes):
+            inds = (np.argwhere(self.particles.positions[:, i] >= max_val).flatten(), i)
+            self.particles.positions[inds] = max_val
+            self.particles.velocities[inds] *= -1
