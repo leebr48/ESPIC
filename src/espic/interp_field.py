@@ -64,21 +64,17 @@ class InterpolatedField:
         # We need to ensure that e_on_grid is a list of arrays
         if len(self.grids) == 1:
             if self.normalize:
-                efield = [
-                    -self.c / self.omega_p * np.gradient(self.phi_on_grid, *self.grids)
+                return [
+                    -self.c / self.omega_p * np.gradient(self.phi_on_grid, *self.grids),
                 ]
-                return efield
-            else:
-                return [-1 * np.gradient(self.phi_on_grid, *self.grids)]
+            return [-1 * np.gradient(self.phi_on_grid, *self.grids)]
 
         if self.normalize:
-            efield = [
+            return [
                 -self.c / self.omega_p * ar
                 for ar in np.gradient(self.phi_on_grid, *self.grids)
             ]
-            return efield
-        else:
-            return [-1 * ar for ar in np.gradient(self.phi_on_grid, *self.grids)]
+        return [-1 * ar for ar in np.gradient(self.phi_on_grid, *self.grids)]
 
     @property
     def interpolated_e(self) -> list[Callable[[ArrayLike], FArray]]:

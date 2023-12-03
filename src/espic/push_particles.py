@@ -28,7 +28,9 @@ class ParticlePusher:
         ``Particles`` object containing all particles to be moved.
     electric_field
         ``InterpolatedField`` object containing the field that will
-        accelerate the particles.
+        accelerate the particles. The ``grids`` on which this field
+        is defined will be used to enforce reflecting boundary
+        conditions.
     dt
         Time step for Euler integration.
     omega_p
@@ -80,7 +82,8 @@ class ParticlePusher:
             * dt
         )
         # Normalization introduces 1/(omega_p * c)
-        # But to go from E_n to E, need to multiply by (c/omega_p)**2 (tracking normalizations from phi)
+        # But to go from E_n to E, need to multiply by (c/omega_p)**2
+        # (tracking normalizations from phi)
         if self.normalize:
             dv *= 1 / (self.omega_p * self.c)
         self.particles.positions = self.particles.positions + dx
