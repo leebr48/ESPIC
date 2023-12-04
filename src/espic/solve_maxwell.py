@@ -46,10 +46,11 @@ class MaxwellSolver1D:
         bc = np.zeros(dim)
         bc[0] = self.boundary_conditions[0]
         bc[-1] = self.boundary_conditions[1]
-        # rhs = -4 * np.pi * delta**2 * rho + bc
-        rhs = -(delta**2) * rho / epsilon_0 + bc
+        rhs = -(delta**2) * rho / (epsilon_0) + bc
 
-        phi[1:-1] = solve_banded((1, 1), bands, rhs)
+        # For some reason, not setting check_finite=False results in NaN errors?
+        # Might be due to how small the values are, which is a separate issue.
+        phi[1:-1] = solve_banded((1, 1), bands, rhs, check_finite=False)
 
         if self.normalize:
             return self.c / self.omega_p * phi
@@ -116,13 +117,12 @@ class MaxwellSolver2D:
 
     def set_rhs(self, N: int, h: float, rho: FArray, bc: dict[str, FArray]) -> FArray:
         N2 = (N - 2) * (N - 2)
-        #        rho = np.ones((N-1,N-1))
         rho = rho[1:-1, 1:-1]
         rho_v = rho.ravel()
 
         r = np.zeros(N2)
 
-        r = -4 * np.pi * h**2 * rho_v
+        r = -(h**2) * rho_v / epsilon_0
         bc = self.boundary_conditions
 
         # Boundary

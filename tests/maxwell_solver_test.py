@@ -1,7 +1,8 @@
 import numpy as np
 
 from espic.make_grid import Uniform2DGrid
-
+from scipy.constants import epsilon_0
+import matplotlib.pyplot as plt
 # Test 1D Maxwell solver for a uniform charge distribution
 from espic.solve_maxwell import MaxwellSolver1D, MaxwellSolver2D
 
@@ -10,9 +11,9 @@ def test_1d_uniform():
     """Test 1D Maxwell solver for a uniform charge distribution"""
     ms = MaxwellSolver1D()
     rho = np.ones(len(ms.grid))
-    phi = ms.solve(rho)
+    phi = ms.solve(rho)*epsilon_0
 
-    true_phi = -2 * np.pi * (ms.grid**2 - 1)
+    true_phi = -rho/2 *(ms.grid**2 - 1)
     err = np.abs(true_phi - phi)
     np.testing.assert_allclose(err, np.zeros(len(err)), atol=1e-9)
 
@@ -80,10 +81,10 @@ def test_2d_poisson_uniform():
     b = 1
 
     grid = Uniform2DGrid(num_points=N, x_min=-b, x_max=b, y_min=0, y_max=a)
-    bc_bottom = -np.pi * grid.x_grid**2
-    bc_top = -np.pi * (grid.x_grid**2 + (a * np.ones(len(grid.y_grid))) ** 2)
-    bc_left = V0 - np.pi * ((-b * np.ones(len(grid.x_grid))) ** 2 + grid.y_grid**2)
-    bc_right = V0 - np.pi * ((b * np.ones(len(grid.x_grid))) ** 2 + grid.y_grid**2)
+    bc_bottom = -1/(4*epsilon_0) * grid.x_grid**2
+    bc_top = -1/(4*epsilon_0) * (grid.x_grid**2 + (a * np.ones(len(grid.y_grid))) ** 2)
+    bc_left = V0 - 1/(4*epsilon_0) * ((-b * np.ones(len(grid.x_grid))) ** 2 + grid.y_grid**2)
+    bc_right = V0 - 1/(4*epsilon_0) * ((b * np.ones(len(grid.x_grid))) ** 2 + grid.y_grid**2)
     boundary_conditions = {
         "bottom": bc_bottom,
         "top": bc_top,
@@ -111,10 +112,8 @@ def test_2d_poisson_uniform():
                 / np.cosh(i * np.pi * b / a)
                 * np.sin(i * np.pi * Y / a)
             )
-    true_phi += -np.pi * (X**2 + Y**2)
+    true_phi += -rho / (4*epsilon_0) * (X**2 + Y**2)
     # FIXME There are some issues that I believe are related to the convergence of an infinite Fourier series
     # FIXME For now, these "magic" numbers should be kept fixed.
-    err = np.abs(true_phi - phi)
-
-    # FIXME There are some issues here near the boundaries. The max error goes to about 0.22. Not sure what the problem is.
-    np.testing.assert_allclose(err, np.zeros(err.shape), atol=1)
+    err = np.abs(true_phi - phi)*epsilon_0
+    np.testing.assert_allclose(err, np.zeros(err.shape), atol=0.1)

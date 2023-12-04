@@ -1,5 +1,6 @@
 # Initial stab at 1D PIC code
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 # %% Initialize Physical Parameters
@@ -12,7 +13,7 @@ from espic.make_grid import Uniform1DGrid
 from espic.push_particles import ParticlePusher
 from espic.solve_maxwell import MaxwellSolver1D
 
-num_particles = 100
+num_particles = 500
 ne = 100
 q = sc.e
 m = sc.m_e
@@ -37,25 +38,38 @@ for i in range(len(init_speed)):
 masses = m * np.ones(num_particles)
 x_min = -10
 x_max = 10
-dt = 1 / (omega_p)
+dt = 1 / (100 * omega_p)
 t = 0
-t_max = 400 / omega_p
+n_max = 20
+t_max = n_max / omega_p
 init_amp = 0.2
+grid = Uniform1DGrid(x_min=x_min, x_max=x_max, num_points=1000)
 
-init_pos = np.random.uniform(low=x_min / 2, high=x_max / 2, size=num_particles)
-charges = q * init_amp * np.sin(init_pos / 2)
+# %%
+
+k = 2 / (2 * x_max)
+p_temp = np.abs(np.sin(2 * np.pi * grid.grid * k))
+pm = p_temp / np.sum(p_temp)
+init_pos = np.random.choice(grid.grid, size=num_particles, p=pm)
+init_pos = np.sort(init_pos)
+
+signs = np.sin(2 * np.pi * init_pos * k) / np.abs(np.sin(2 * np.pi * init_pos * k))
+charges = -q * np.ones(len(init_pos))
+charges *= signs
+
 
 init_vel = init_vel.reshape((len(init_vel), 1))
 init_pos = init_pos.reshape((len(init_pos), 1))
 
 particles = Particles(charges, masses, init_pos, init_vel)
-grid = Uniform1DGrid(x_min=x_min, x_max=x_max, num_points=1000)
 boundary_conditions = 0 * np.ones(2)
 
-# %% Run simulation
 cd = ChargeDeposition(grid=grid)
 rho = cd.deposit(particles.charges, particles.positions)
 init_rho = cd.deposit(particles.charges, particles.positions)
+
+# %% Run simulation
+
 ms = MaxwellSolver1D(
     boundary_conditions=boundary_conditions,
     grid=grid,
@@ -75,7 +89,13 @@ efield = InterpolatedField(
 particle_pusher = ParticlePusher(particles, efield, dt, omega_p, sc.c, normalize=True)
 
 phi_v_time = ()
-rho_v_time = ()
+integrated_phi = np.zeros(int(t_max / dt) + 2)
+count = 0
+
+
+def integrate_phi(x, phi):
+    return np.trapz(phi, x)
+
 
 while t < t_max:
     particle_pusher.evolve()
@@ -87,87 +107,57 @@ while t < t_max:
     phi = ms.solve(rho)
 
     phi_v_time += (phi,)
-    rho_v_time += (rho,)
+    integrated_phi[count] = integrate_phi(grid.grid, phi)
+    count += 1
 
     particle_pusher.update_potential(phi)
 
     t += dt
 
+plt.plot(np.arange(len(integrated_phi)) * dt * omega_p, integrated_phi)
+
+
+# %% Diagnostics
+
+phi_v_time_arr = np.array(phi_v_time)
+phi_v_time_fft = np.abs(np.fft.fft2(phi_v_time_arr))
+freq = np.fft.fftfreq(phi_v_time_fft.shape[0], dt)
+k_arr = np.fft.fftfreq(phi_v_time_fft.shape[1], grid.delta)
+
+# Plot space fft of initial phi to verify we have the right k
+plt.figure(1)
+specific_k = k_arr[1]
+plt.plot(k_arr, phi_v_time_fft[0, :])
+plt.xlim([0, 0.5])
+plt.axvline(k, color="r")
+
+# Plot time fft at right k
+plt.figure(2)
+plt.plot(freq, phi_v_time_fft[:, 2])
+plt.xlim([0, 500])
+plt.axvline(omega_p / (2 * np.pi), color="r")
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Amplitude")
+
+
 # %% Compute fft
+
+# phi_fft = np.abs(np.fft.fft2(phi_v_time_arr))
+
+phi_fft = np.abs(np.fft.fft(integrated_phi))
+freq = np.fft.fftfreq(len(phi_fft), dt)
+k = np.fft.fftfreq(len(grid.grid), grid.delta)
+
+plt.plot(freq, phi_fft)
+plt.axvline(omega_p / (2 * np.pi), color="r")
+plt.xlim([0, 500])
+
+
 phi_v_time_arr = np.array(phi_v_time)
-phi_fft = np.abs(np.fft.fft2(phi_v_time_arr))
+phi_v_time_fft = np.abs(np.fft.fft2(phi_v_time_arr))
 
-
-# %% Make animation
-
-import matplotlib.pyplot as plt
-from matplotlib import animation
-
-writer = animation.FFMpegWriter(fps=5)
-# writer = Writer(fps=5, metadata=dict(artist='Me'), bitrate=1800)
-
-phi_v_time_arr = np.array(phi_v_time)
-fig = plt.figure()
-
-
-def animate(i):
-    plt.plot(grid.grid, phi_v_time[i])
-
-
-ani = animation.FuncAnimation(fig, animate, frames=len(phi_v_time_arr), repeat=True)
-
-writervideo = animation.FFMpegWriter(fps=5)
-ani.save("phi_v_time.mp4", writer=writervideo)
-plt.show()
-
-
-# %%
-
-# charges = 1e-4* np.ones(num_particles)
-masses = np.ones(num_particles)
-init_vel = np.random.normal(size=num_particles)
-# init_vel = np.zeros(num_particles)
-init_pos = np.random.uniform(low=-1, high=1, size=num_particles)
-charges = 1e-4 * np.sin(10 * init_pos)
-
-init_vel = init_vel.reshape((len(init_vel), 1))
-init_pos = init_pos.reshape((len(init_pos), 1))
-
-particles = Particles(charges, masses, init_pos, init_vel)
-grid = Uniform1DGrid(x_min=-10, x_max=10, num_points=1000)
-boundary_conditions = 0 * np.ones(2)
-
-dt = 0.01
-t = 0
-tm = 1
-
-# Initialization
-cd = ChargeDeposition(grid=grid)
-rho = cd.deposit(particles.charges, particles.positions)
-init_rho = cd.deposit(particles.charges, particles.positions)
-ms = MaxwellSolver1D(boundary_conditions=boundary_conditions, grid=grid)
-phi = ms.solve(rho)
-init_phi = ms.solve(rho)
-efield = InterpolatedField(grids=[grid], phi_on_grid=phi)
-
-rho_t = ()
-vel_t = ()
-phi_t = ()
-efield_t = []
-while t < tm:
-    particle_pusher = ParticlePusher(particles, efield, dt)
-    particle_pusher.evolve()
-
-    rho = cd.deposit(
-        particle_pusher.particles.charges,
-        particle_pusher.particles.positions,
-    )
-    phi = ms.solve(rho)
-    efield = InterpolatedField(grids=[grid], phi_on_grid=phi)
-
-    rho_t += (rho,)
-    phi_t += (phi,)
-    efield_t.append(
-        efield.evaluate(grid.grid) * np.hanning(tm / dt).reshape((int(tm / dt), 1)),
-    )
-    t += dt
+phi_single = phi_v_time_arr[:, 250]
+phi_single_fft = np.abs(np.fft.fft(phi_single))
+plt.plot(freq[:-1], phi_single_fft)
+plt.axvline(omega_p / (2 * np.pi), color="r")
+plt.xlim([0, 500])
