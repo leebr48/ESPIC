@@ -90,6 +90,55 @@ class ParticlePusher:
         self.particles.velocities = self.particles.velocities + dv
         self.enforce_boundaries()
 
+    def evolve_leapfrog(self, dt: float | None = None) -> None:
+        """
+        Evolve the particle positions and velocities forward one time step.
+        These attributes are modified in-place (that is, in the ``particles``
+        attribute of this class).
+
+        Parameters
+        ----------
+        dt
+            If None, use the ``dt`` assigned at class instantiation.
+            Otherwise, use the specified value.
+        """
+        if dt is None:
+            dt = self.dt
+
+        # Compute V_i at the half time step
+        dv_12 = (
+            self.particles.charges[:, np.newaxis]
+            / self.particles.masses[:, np.newaxis]
+            * self.E.evaluate(self.particles.positions)
+            * dt
+            / 2
+        )
+        if self.normalize:
+            dv_12 *= 1 / (self.omega_p * self.c)
+
+        # Compute dx and update particle positions
+        dx = (self.particles.velocities + dv_12) * dt
+        self.particles.positions = self.particles.positions + dx
+
+        self.enforce_boundaries()
+
+        # Compute V_i at 3/2 time step
+        dv_32 = (
+            self.particles.charges[:, np.newaxis]
+            / self.particles.masses[:, np.newaxis]
+            * self.E.evaluate(self.particles.positions)
+            * dt
+        )
+
+        if self.normalize:
+            dv_32 *= 1 / (self.omega_p * self.c)
+
+        self.particles.velocities = self.particles.velocities + dv_32
+
+        # Normalization introduces 1/(omega_p * c)
+        # But to go from E_n to E, need to multiply by (c/omega_p)**2
+        # (tracking normalizations from phi)
+
     def update_field(self, new_electric_field: InterpolatedField) -> None:
         """
         Update the electric field that accelerates the particles.
