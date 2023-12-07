@@ -9,14 +9,6 @@ espic package
 Submodules
 ----------
 
-espic.calc\_charge\_density module
-----------------------------------
-
-.. automodule:: espic.calc_charge_density
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 espic.def\_particles module
 ---------------------------
 

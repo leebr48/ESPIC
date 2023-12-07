@@ -44,6 +44,10 @@ class Initialize:
             Center of the distribution.
         stdev
             Standard deviation of the distribution.
+
+        Returns
+        -------
+            Samples from a normal distribution.
         """
         return np.random.default_rng().normal(loc=mean, scale=stdev, size=self.size)
 
@@ -59,6 +63,10 @@ class Initialize:
             Minimum value of the distribution (inclusive).
         upper_bound
             Maximum value of the distribution (exclusive).
+
+        Returns
+        -------
+            Samples from a uniform distribution.
         """
         return np.random.default_rng().uniform(
             low=lower_bound,
@@ -82,6 +90,10 @@ class Initialize:
             Value at which the distribution returns zero. In statistical
             mechanics, this only occurs at a velocity of zero (unless the
             unphysical limit of infinite velocity is considered).
+
+        Returns
+        -------
+            Samples from a Maxwellian distribution.
         """
         return np.asarray(maxwell.rvs(loc=start, scale=spread, size=self.size))
 
