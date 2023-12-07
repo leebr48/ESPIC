@@ -65,10 +65,17 @@ class MaxwellSolver2D:
         self,
         boundary_conditions: dict[str, FArray] | None = None,
         grid: Uniform2DGrid = Uniform2DGrid(),
+        omega_p: float = 1,
+        c: float = 1,
+        normalize: bool = False,
     ) -> None:
         self.grid = grid.grid
         self.x_grid = grid.x_grid
         self.y_grid = grid.y_grid
+        self.omega_p = omega_p
+        self.c = c
+        self.normalize = normalize
+
         if boundary_conditions is None:
             N = len(self.x_grid)
             boundary_conditions = {
@@ -159,4 +166,7 @@ class MaxwellSolver2D:
         phi[1 : gridsize - 1, 1 : gridsize - 1] = phi_v.reshape(
             (gridsize - 2, gridsize - 2),
         )
+
+        if self.normalize:
+            return self.c / self.omega_p * phi
         return phi

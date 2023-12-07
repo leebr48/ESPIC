@@ -84,3 +84,11 @@ class Initialize:
             unphysical limit of infinite velocity is considered).
         """
         return np.asarray(maxwell.rvs(loc=start, scale=spread, size=self.size))
+
+    def sinusoidal(self, k: float, grid: FArray) -> FArray:
+        p_temp = np.abs(np.sin(2 * np.pi * grid * k))
+        pm = p_temp / np.sum(p_temp)
+        return np.sort(np.random.choice(grid, size=self.size, p=pm))
+
+    def zero(self) -> FArray:
+        return np.zeros(self.size)
