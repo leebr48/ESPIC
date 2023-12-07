@@ -62,7 +62,8 @@ class ParticlePusher:
 
     def evolve(self, dt: float | None = None) -> None:
         """
-        Evolve the particle positions and velocities forward one time step.
+        Evolve the particle positions and velocities forward one time step
+        using the Euler method.
         These attributes are modified in-place (that is, in the ``particles``
         attribute of this class).
 
@@ -92,7 +93,8 @@ class ParticlePusher:
 
     def evolve_leapfrog(self, dt: float | None = None) -> None:
         """
-        Evolve the particle positions and velocities forward one time step.
+        Evolve the particle positions and velocities forward one time step
+        using the leapfrog method.
         These attributes are modified in-place (that is, in the ``particles``
         attribute of this class).
 
