@@ -1,4 +1,7 @@
-"""Defines MaxwellSolver1D, which calculates the electric field on the spatial grid."""
+"""
+Implements solvers in 1D and 2D for Poisson's equation for the electrostatic
+potential given the charge density.
+"""
 from __future__ import annotations
 
 from functools import cached_property
@@ -14,6 +17,25 @@ FArray = NDArray[np.float64]
 
 
 class MaxwellSolver1D:
+    """
+    Solves Poisson's equation in 1D'
+
+    Parameters
+    ----------
+    boundary_conditions
+        Array indicating boundary conditions.
+    grid
+        ``Uniform1DGrid`` defining the grid points where the potential will be calculated
+    omega_p
+        Plasma frequency in inverse seconds.
+    c
+        Speed of light in meters per second.
+    normalize
+        If False, perform calculations in "raw" units. If True,
+        normalize equations using the natural units specified
+        by ``omega_p`` and ``c``.
+    """
+
     def __init__(
         self,
         boundary_conditions: FArray = np.zeros(2),
@@ -31,6 +53,20 @@ class MaxwellSolver1D:
 
     # Centered differences. FIXME should we make it arbitrary?
     def solve(self, rho: FArray) -> FArray:
+        """
+        Solves the 1D Poisson's equation for a given charge distribution'
+
+        Parameters
+        ----------
+        rho : FArray
+            The charge density defined on the grid points.
+
+        Returns
+        -------
+        FArray
+            The electrostatic potential phi on the grid points.
+
+        """
         delta = self.grid[1] - self.grid[0]
         dim = len(self.grid) - 2
         phi = np.zeros(len(self.grid))
@@ -61,6 +97,25 @@ class MaxwellSolver1D:
 # Code taken from https://john-s-butler-dit.github.io/NumericalAnalysisBook/Chapter%2009%20-%20Elliptic%20Equations/903_Poisson%20Equation-Boundary.html
 # FIXME: for now, this assumes equal spacing in x and y.
 class MaxwellSolver2D:
+    """
+    Solves Poisson's equation in 1D'
+
+    Parameters
+    ----------
+    boundary_conditions
+        Dictionary of array containing boundary conditions.
+    grid
+        ``Uniform2DGrid`` defining the grid points where the potential will be calculated
+    omega_p
+        Plasma frequency in inverse seconds.
+    c
+        Speed of light in meters per second.
+    normalize
+        If False, perform calculations in "raw" units. If True,
+        normalize equations using the natural units specified
+        by ``omega_p`` and ``c``.
+    """
+
     def __init__(
         self,
         boundary_conditions: dict[str, FArray] | None = None,
@@ -90,10 +145,35 @@ class MaxwellSolver2D:
 
     @cached_property
     def A(self) -> FArray:
+        """
+        Returns the "A" matrix in A * phi = b that will be inverted to solve for A.
+        It contains the coffeicients that arise from the finite-differencing
+        scheme.
+
+        Returns
+        -------
+        FArray
+            The A matrix in A * phi = b.
+
+        """
         # It's better to set A in the initialization, since it doesn't change over time.
         return self.set_A(len(self.x_grid))
 
     def set_A(self, N: int) -> FArray:
+        """
+        The loops used to initialize the "A" matrix in A * phi = b.
+
+        Parameters
+        ----------
+        N : int
+            DESCRIPTION.
+
+        Returns
+        -------
+        FArray
+            The A matrix in A * phi = b..
+
+        """
         N2 = (N - 2) * (N - 2)
         A = np.zeros((N2, N2))
         ## Diagonal
@@ -123,6 +203,27 @@ class MaxwellSolver2D:
         return A
 
     def set_rhs(self, N: int, h: float, rho: FArray, bc: dict[str, FArray]) -> FArray:
+        """
+        Sets the "b" vector in A * phi = b. It contains information about the
+        charge density and the boundary conditions.
+
+        Parameters
+        ----------
+        N : int
+            The number of grid points.
+        h : float
+            The spacing between grid points.
+        rho : FArray
+            The charge density on grid points.
+        bc : dict[str, FArray]
+            A dictionary containing the boundary conditions.
+
+        Returns
+        -------
+        FArray
+            The "b" vector in A * phi = b.
+
+        """
         N2 = (N - 2) * (N - 2)
         rho = rho[1:-1, 1:-1]
         rho_v = rho.ravel()
@@ -149,6 +250,20 @@ class MaxwellSolver2D:
         return rhs
 
     def solve(self, rho: FArray) -> FArray:
+        """
+        Solves the 1D Poisson's equation for a given charge distribution'
+
+        Parameters
+        ----------
+        rho : FArray
+            The charge density on grid points.
+
+        Returns
+        -------
+        FArray
+            The electrostatic potential evaluated on grid points.
+
+        """
         gridsize = len(self.x_grid)
         h = self.x_grid[1] - self.x_grid[0]
         rhs = self.set_rhs(gridsize, h, rho, self.boundary_conditions)
