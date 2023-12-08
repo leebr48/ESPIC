@@ -1,3 +1,7 @@
+"""
+Defines the driver class for ESPIC used to run simulations
+"""
+
 import numpy as np
 import scipy.constants as sc
 from numpy.typing import NDArray
@@ -14,6 +18,45 @@ FArray = NDArray[np.float64]
 
 
 class RunESPIC:
+    """
+    Driver class for the ESPIC particle-in-cell simulation code.
+
+    Parameters
+    ----------
+    init_pos
+        Array containing the inital positions of each particle
+    init_vel.
+        Array containing the initial velocities of each particle.
+    boundary_conditions:
+        Array or tuple containing the boundary conditions.
+    boundaries:
+        Dictionary containing the limits of the simulation domain. Keys are
+        "top", "bottom", "left", and "right"
+    physical_parameters:
+        Dictionary containing important physical parameters: the particle charge,
+        the particle mass, the speed of light, the background charge density,
+        and the plasma frequency.
+    signs:
+        Array containing +1 or -1. Important for sinusoidal charge distributions.
+    num_particles:
+        The number of particles in the simulation.
+    num_grid:
+        The number of grid points (along each axis).
+    dim:
+        The spatial dimension of the simulation.
+    dt:
+        The time-step in the simulation.
+    t_max:
+        The maximum time of the simulation.
+    k:
+        The wavevector for initial perturbations. Important for sinusoidal perturbations.
+        For example, the initial density perturbation can be ~ sin(kx).
+    normalize
+        If False, perform calculations in "raw" units. If True,
+        normalize equations using the natural units specified
+        by ``omega_p`` and ``c``.
+    """
+
     def __init__(
         self,
         init_pos: FArray,
@@ -67,7 +110,9 @@ class RunESPIC:
 
         if dim == 1:
             self.grid = Uniform1DGrid(
-                self.num_grid, self.boundaries["left"], self.boundaries["right"]
+                self.num_grid,
+                self.boundaries["left"],
+                self.boundaries["right"],
             )
         if dim == 2:
             self.grid = Uniform2DGrid(
@@ -118,6 +163,13 @@ class RunESPIC:
     def initialize_solvers(
         self,
     ) -> None:
+        """
+
+        Initializes the Particles, ChargeDeposition, MaxwellSolver1D (or 2D),
+        and PariclePusher objects used to self-consistently evolve the particle states.
+
+
+        """
         particles = Particles(self.charges, self.masses, self.init_pos, self.init_vel)
 
         charge_deposition = ChargeDeposition(grid=self.grid)
@@ -159,6 +211,14 @@ class RunESPIC:
         return (charge_deposition, maxwell_solver, particle_pusher)
 
     def run(self) -> None:
+        """
+        Runs the simuation. Steps are
+
+        1) Evolve particle positions and velocities using current electric field.
+        2) Compute new charge density.
+        3) Compute new electrostatic potential.
+
+        """
         t = 0
         self.rho_v_time = ()
         self.phi_v_time = ()
@@ -185,11 +245,35 @@ class RunESPIC:
             t += self.dt
 
     def compute_plasma_frequency(self) -> float:
+        """
+        Computes plasma frequency = sqrt(n * e^2/(m epsilon_0))
+
+        Returns
+        -------
+        float
+            The plasma frequency
+
+        """
         ne = self.physical_parameters["ne"]
         q = self.physical_parameters["q"]
         m = self.physical_parameters["m"]
 
         return np.sqrt(ne * q**2 / (m * sc.epsilon_0))
 
-    def integrate_phi(self, phi) -> float:
+    def integrate_phi(self, phi: FArray) -> float:
+        """
+        Integrates the electrostatic potential (currently in 1D).
+        Uses a trapezoidal scheme.
+
+        Parameters
+        ----------
+        phi : FArray
+            The electrostatic potential.
+
+        Returns
+        -------
+        float
+            The integral of phi along x.
+
+        """
         return np.trapz(self.grid.grid, phi)

@@ -18,7 +18,7 @@ FArray = NDArray[np.float64]
 
 class MaxwellSolver1D:
     """
-    Solves Poisson's equation in 1D'
+    Solves Poisson's equation in 1D
 
     Parameters
     ----------
@@ -54,7 +54,7 @@ class MaxwellSolver1D:
     # Centered differences. FIXME should we make it arbitrary?
     def solve(self, rho: FArray) -> FArray:
         """
-        Solves the 1D Poisson's equation for a given charge distribution'
+        Solves the 1D Poisson's equation for a given charge distribution
 
         Parameters
         ----------
@@ -98,7 +98,7 @@ class MaxwellSolver1D:
 # FIXME: for now, this assumes equal spacing in x and y.
 class MaxwellSolver2D:
     """
-    Solves Poisson's equation in 1D'
+    Solves Poisson's equation in 2D
 
     Parameters
     ----------

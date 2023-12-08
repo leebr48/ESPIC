@@ -73,7 +73,8 @@ run_espic = RunESPIC(
 
 run_espic.run()
 
-# %%
+# %% Computes FFTs in space and time in order to study the frequency spectrum
+
 phi_v_time_arr = np.array(run_espic.phi_v_time)
 phi_v_time_fft = np.abs(np.fft.fft2(phi_v_time_arr))
 freq = np.fft.fftfreq(phi_v_time_fft.shape[0], dt)
