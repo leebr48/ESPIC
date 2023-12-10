@@ -1,6 +1,8 @@
 """
-Defines the driver class for ESPIC used to run simulations
+Defines the driver class for ESPIC used to run simulations.
 """
+
+from __future__ import annotations
 
 import numpy as np
 import scipy.constants as sc
@@ -25,30 +27,30 @@ class RunESPIC:
     ----------
     init_pos
         Array containing the inital positions of each particle
-    init_vel.
+    init_vel
         Array containing the initial velocities of each particle.
-    boundary_conditions:
+    boundary_conditions
         Array or tuple containing the boundary conditions.
-    boundaries:
+    boundaries
         Dictionary containing the limits of the simulation domain. Keys are
         "top", "bottom", "left", and "right"
-    physical_parameters:
+    physical_parameters
         Dictionary containing important physical parameters: the particle charge,
         the particle mass, the speed of light, the background charge density,
         and the plasma frequency.
-    signs:
+    signs
         Array containing +1 or -1. Important for sinusoidal charge distributions.
-    num_particles:
+    num_particles
         The number of particles in the simulation.
-    num_grid:
+    num_grid
         The number of grid points (along each axis).
-    dim:
+    dim
         The spatial dimension of the simulation.
-    dt:
+    dt
         The time-step in the simulation.
-    t_max:
+    t_max
         The maximum time of the simulation.
-    k:
+    k
         The wavevector for initial perturbations. Important for sinusoidal perturbations.
         For example, the initial density perturbation can be ~ sin(kx).
     normalize

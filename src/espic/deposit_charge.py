@@ -1,4 +1,7 @@
-"""Defines ChargeDeposition class, which places charges at float positions on the spatial grid."""
+"""
+Defines ChargeDeposition class, which places
+charges at float positions on the spatial grid.
+"""
 
 from __future__ import annotations
 
@@ -91,6 +94,4 @@ class ChargeDeposition:
             disti = dist[:, i]
             rho += ChargeWeightFunc(disti, self.grid.delta).zeroth_order() * q_arr[i]
 
-        rho = rho.reshape(self.grid.shape)
-
-        return rho
+        return rho.reshape(self.grid.shape)

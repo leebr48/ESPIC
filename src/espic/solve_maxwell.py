@@ -18,14 +18,15 @@ FArray = NDArray[np.float64]
 
 class MaxwellSolver1D:
     """
-    Solves Poisson's equation in 1D
+    Solves Poisson's equation in 1D.
 
     Parameters
     ----------
     boundary_conditions
         Array indicating boundary conditions.
     grid
-        ``Uniform1DGrid`` defining the grid points where the potential will be calculated
+        ``Uniform1DGrid`` defining the grid points where the potential
+        will be calculated.
     omega_p
         Plasma frequency in inverse seconds.
     c
@@ -54,16 +55,15 @@ class MaxwellSolver1D:
     # Centered differences. FIXME should we make it arbitrary?
     def solve(self, rho: FArray) -> FArray:
         """
-        Solves the 1D Poisson's equation for a given charge distribution
+        Solves the 1D Poisson's equation for a given charge distribution.
 
         Parameters
         ----------
-        rho : FArray
+        rho
             The charge density defined on the grid points.
 
         Returns
         -------
-        FArray
             The electrostatic potential phi on the grid points.
 
         """
@@ -90,22 +90,22 @@ class MaxwellSolver1D:
 
         if self.normalize:
             return self.c / self.omega_p * phi
-        else:
-            return phi
+        return phi
 
 
 # Code taken from https://john-s-butler-dit.github.io/NumericalAnalysisBook/Chapter%2009%20-%20Elliptic%20Equations/903_Poisson%20Equation-Boundary.html
 # FIXME: for now, this assumes equal spacing in x and y.
 class MaxwellSolver2D:
     """
-    Solves Poisson's equation in 2D
+    Solves Poisson's equation in 2D.
 
     Parameters
     ----------
     boundary_conditions
         Dictionary of array containing boundary conditions.
     grid
-        ``Uniform2DGrid`` defining the grid points where the potential will be calculated
+        ``Uniform2DGrid`` defining the grid points where the potential
+        will be calculated.
     omega_p
         Plasma frequency in inverse seconds.
     c
@@ -132,135 +132,132 @@ class MaxwellSolver2D:
         self.normalize = normalize
 
         if boundary_conditions is None:
-            N = len(self.x_grid)
+            n = len(self.x_grid)
             boundary_conditions = {
-                "bottom": np.zeros(N),
-                "top": np.zeros(N),
-                "left": np.zeros(N),
-                "right": np.zeros(N),
+                "bottom": np.zeros(n),
+                "top": np.zeros(n),
+                "left": np.zeros(n),
+                "right": np.zeros(n),
             }
 
         self.boundary_conditions = boundary_conditions
         self.phi = np.zeros((len(self.grid), len(self.grid)))
 
     @cached_property
-    def A(self) -> FArray:
+    def a(self) -> FArray:
         """
-        Returns the "A" matrix in A * phi = b that will be inverted to solve for A.
+        Returns the :math:`a` matrix in :math:`a * phi = b` that will be
+        inverted to solve for :math:`a`. # FIXME solve for a or phi?
         It contains the coffeicients that arise from the finite-differencing
         scheme.
 
         Returns
         -------
-        FArray
-            The A matrix in A * phi = b.
+            The :math:`a` matrix in :math:`a * phi = b`.
 
         """
-        # It's better to set A in the initialization, since it doesn't change over time.
-        return self.set_A(len(self.x_grid))
+        # It's better to set a in the initialization, since it doesn't change over time.
+        return self.set_a(len(self.x_grid))
 
-    def set_A(self, N: int) -> FArray:
+    def set_a(self, n: int) -> FArray:
         """
-        The loops used to initialize the "A" matrix in A * phi = b.
+        The loops used to initialize the :math:`a` matrix in :math:`a * phi = b`.
 
         Parameters
         ----------
-        N : int
-            DESCRIPTION.
+        n
+            DESCRIPTION. # FIXME
 
         Returns
         -------
-        FArray
-            The A matrix in A * phi = b..
+            The :math:`a` matrix in :math:`a * phi = b`.
 
         """
-        N2 = (N - 2) * (N - 2)
-        A = np.zeros((N2, N2))
+        n2 = (n - 2) * (n - 2)
+        a = np.zeros((n2, n2))
         ## Diagonal
-        for i in range(N - 2):
-            for j in range(N - 2):
-                A[i + (N - 2) * j, i + (N - 2) * j] = -4
+        for i in range(n - 2):
+            for j in range(n - 2):
+                a[i + (n - 2) * j, i + (n - 2) * j] = -4
 
         # LOWER DIAGONAL
-        for i in range(1, N - 2):
-            for j in range(N - 2):
-                A[i + (N - 2) * j, i + (N - 2) * j - 1] = 1
+        for i in range(1, n - 2):
+            for j in range(n - 2):
+                a[i + (n - 2) * j, i + (n - 2) * j - 1] = 1
         # UPPPER DIAGONAL
-        for i in range(N - 3):
-            for j in range(N - 2):
-                A[i + (N - 2) * j, i + (N - 2) * j + 1] = 1
+        for i in range(n - 3):
+            for j in range(n - 2):
+                a[i + (n - 2) * j, i + (n - 2) * j + 1] = 1
 
         # LOWER IDENTITY MATRIX
-        for i in range(N - 2):
-            for j in range(1, N - 2):
-                A[i + (N - 2) * j, i + (N - 2) * (j - 1)] = 1
+        for i in range(n - 2):
+            for j in range(1, n - 2):
+                a[i + (n - 2) * j, i + (n - 2) * (j - 1)] = 1
 
         # UPPER IDENTITY MATRIX
-        for i in range(N - 2):
-            for j in range(N - 3):
-                A[i + (N - 2) * j, i + (N - 2) * (j + 1)] = 1
+        for i in range(n - 2):
+            for j in range(n - 3):
+                a[i + (n - 2) * j, i + (n - 2) * (j + 1)] = 1
 
-        return A
+        return a
 
-    def set_rhs(self, N: int, h: float, rho: FArray, bc: dict[str, FArray]) -> FArray:
+    def set_rhs(self, n: int, h: float, rho: FArray, bc: dict[str, FArray]) -> FArray:
         """
-        Sets the "b" vector in A * phi = b. It contains information about the
-        charge density and the boundary conditions.
+        Sets the :math:`b` vector in :math:`a * phi = b`.
+        It contains information about the charge density
+        and the boundary conditions.
 
         Parameters
         ----------
-        N : int
+        n
             The number of grid points.
-        h : float
+        h
             The spacing between grid points.
-        rho : FArray
+        rho
             The charge density on grid points.
-        bc : dict[str, FArray]
+        bc
             A dictionary containing the boundary conditions.
 
         Returns
         -------
-        FArray
-            The "b" vector in A * phi = b.
+            The :math:`b` vector in :math:`a * phi = b`.
 
         """
-        N2 = (N - 2) * (N - 2)
+        n2 = (n - 2) * (n - 2)
         rho = rho[1:-1, 1:-1]
         rho_v = rho.ravel()
 
-        r = np.zeros(N2)
+        r = np.zeros(n2)
 
         r = -(h**2) * rho_v / epsilon_0
         bc = self.boundary_conditions
 
         # Boundary
-        b_bottom_top = np.zeros(N2)
-        for i in range(N - 2):
+        b_bottom_top = np.zeros(n2)
+        for i in range(n - 2):
             b_bottom_top[i] = bc["bottom"][i]  # Bottom Boundary
-            b_bottom_top[i + (N - 2) * (N - 3)] = bc["top"][i]  # Top Boundary
+            b_bottom_top[i + (n - 2) * (n - 3)] = bc["top"][i]  # Top Boundary
 
-        b_left_right = np.zeros(N2)
-        for j in range(N - 2):
-            b_left_right[(N - 2) * j] = bc["left"][j]  # Left Boundary
-            b_left_right[N - 3 + (N - 2) * j] = bc["right"][j]  # Right Boundary
+        b_left_right = np.zeros(n2)
+        for j in range(n - 2):
+            b_left_right[(n - 2) * j] = bc["left"][j]  # Left Boundary
+            b_left_right[n - 3 + (n - 2) * j] = bc["right"][j]  # Right Boundary
 
         b = b_left_right + b_bottom_top
 
-        rhs = r - b
-        return rhs
+        return r - b
 
     def solve(self, rho: FArray) -> FArray:
         """
-        Solves the 1D Poisson's equation for a given charge distribution'
+        Solves the 1D Poisson's equation for a given charge distribution.
 
         Parameters
         ----------
-        rho : FArray
+        rho
             The charge density on grid points.
 
         Returns
         -------
-        FArray
             The electrostatic potential evaluated on grid points.
 
         """
@@ -268,8 +265,9 @@ class MaxwellSolver2D:
         h = self.x_grid[1] - self.x_grid[0]
         rhs = self.set_rhs(gridsize, h, rho, self.boundary_conditions)
 
-        # This is still a banded matrix, but now the locations of the bands depends on N. Will make more efficient later.
-        phi_v = solve(self.A, rhs)
+        # This is still a banded matrix, but now the locations of
+        # the bands depends on n. Will make more efficient later. # FIXME true?
+        phi_v = solve(self.a, rhs)
         phi = np.zeros((gridsize, gridsize))
 
         # Apply bc. Have to flip top and bottom bc because phi matrix goes down to up

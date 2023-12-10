@@ -100,7 +100,7 @@ class Initialize:
     def sinusoidal(self, k: float, grid: FArray) -> FArray:
         p_temp = np.abs(np.sin(2 * np.pi * grid * k))
         pm = p_temp / np.sum(p_temp)
-        return np.sort(np.random.choice(grid, size=self.size, p=pm))
+        return np.sort(np.random.default_rng().choice(grid, size=self.size, p=pm))
 
     def zero(self) -> FArray:
         return np.zeros(self.size)

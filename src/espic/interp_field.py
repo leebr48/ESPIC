@@ -34,6 +34,14 @@ class InterpolatedField:
         Note that this array must be indexed Pythonically.
         In particular, if it is generated with ``numpy.meshgrid``,
         the ``indexing='ij'`` option **must** be used.
+    omega_p
+        Plasma frequency in inverse seconds.
+    c
+        Speed of light in meters per second.
+    normalize
+        If False, perform calculations in "raw" units. If True,
+        normalize equations using the natural units specified
+        by ``omega_p`` and ``c``.
     """
 
     def __init__(

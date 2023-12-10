@@ -91,7 +91,10 @@ class ParticlePusher:
         self.particles.velocities = self.particles.velocities + dv
         self.enforce_boundaries()
 
-    def evolve_leapfrog(self, dt: float | None = None) -> None:
+    def evolve_leapfrog(
+        self,
+        dt: float | None = None,
+    ) -> None:  # FIXME this needs a test
         """
         Evolve the particle positions and velocities forward one time step
         using the leapfrog method.
