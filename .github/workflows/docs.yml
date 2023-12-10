@@ -44,7 +44,7 @@ jobs:
       - docs
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: https://leebr48.github.io/ESPIC/
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
