@@ -18,7 +18,13 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Pages
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: setup pages
         id: pages
         uses: actions/configure-pages@v2
 
