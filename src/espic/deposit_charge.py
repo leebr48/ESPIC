@@ -76,7 +76,6 @@ class ChargeDeposition:
 
         Returns
         -------
-        FArray
             The charge density for each point in the grid.
 
         """

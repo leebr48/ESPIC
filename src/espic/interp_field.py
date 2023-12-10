@@ -39,7 +39,7 @@ class InterpolatedField:
     c
         Speed of light in meters per second.
     normalize
-        If False, perform calculations in "raw" units. If True,
+        If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
     """

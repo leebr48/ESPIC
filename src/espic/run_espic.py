@@ -21,25 +21,25 @@ FArray = NDArray[np.float64]
 
 class RunESPIC:
     """
-    Driver class for the ESPIC particle-in-cell simulation code.
+    Driver class for ESPIC.
 
     Parameters
     ----------
     init_pos
-        Array containing the inital positions of each particle
+        Array containing the inital positions of each particle.
     init_vel
         Array containing the initial velocities of each particle.
     boundary_conditions
         Array or tuple containing the boundary conditions.
     boundaries
         Dictionary containing the limits of the simulation domain. Keys are
-        "top", "bottom", "left", and "right"
+        ``top``, ``bottom``, ``left``, and ``right``.
     physical_parameters
         Dictionary containing important physical parameters: the particle charge,
         the particle mass, the speed of light, the background charge density,
         and the plasma frequency.
     signs
-        Array containing +1 or -1. Important for sinusoidal charge distributions.
+        Array containing :math:`+1` or :math:`-1`. Important for sinusoidal charge distributions.
     num_particles
         The number of particles in the simulation.
     num_grid
@@ -52,9 +52,9 @@ class RunESPIC:
         The maximum time of the simulation.
     k
         The wavevector for initial perturbations. Important for sinusoidal perturbations.
-        For example, the initial density perturbation can be ~ sin(kx).
+        For example, the initial density perturbation can be :math:`\\sim \\sin{kx}`.
     normalize
-        If False, perform calculations in "raw" units. If True,
+        If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
     """
@@ -161,8 +161,8 @@ class RunESPIC:
 
     def initialize_solvers(self) -> None:
         """
-        Initializes the Particles, ChargeDeposition, MaxwellSolver1D (or 2D),
-        and PariclePusher objects used to self-consistently evolve the particle states.
+        Initializes the ``Particles``, ``ChargeDeposition``, ``MaxwellSolver1D`` (or 2D),
+        and ``PariclePusher`` objects used to self-consistently evolve the particle states.
         """
         particles = Particles(self.charges, self.masses, self.init_pos, self.init_vel)
 
@@ -207,9 +207,9 @@ class RunESPIC:
     def run(self) -> None:
         """
         Runs the simuation. Steps are
-        #. Evolve particle positions and velocities using current electric field.
-        #. Compute new charge density.
-        #. Compute new electrostatic potential.
+        (1) evolve particle positions and velocities using current electric field,
+        (2) compute new charge density, and
+        (3) compute new electrostatic potential.
         """
         t = 0
         self.rho_v_time = ()
@@ -238,7 +238,7 @@ class RunESPIC:
 
     def compute_plasma_frequency(self) -> float:
         """
-        Computes plasma frequency = sqrt(n * e^2/(m epsilon_0)).
+        Computes plasma frequency :math:`= \\sqrt{\\frac{n  e^{2}}{m \\epsilon_{0}}}`.
 
         Returns
         -------
@@ -262,7 +262,7 @@ class RunESPIC:
 
         Returns
         -------
-            The integral of phi along x.
+            The integral of ``phi`` along x.
 
         """
         return np.trapz(self.grid.grid, phi)

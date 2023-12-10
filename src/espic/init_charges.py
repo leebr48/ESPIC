@@ -84,8 +84,8 @@ class Initialize:
         ----------
         spread
             Width of the distribution. If the distribution is used to model
-            particle velocities as in statistical mechanics, ``spread`` ==
-            sqrt((Boltzmann constant) * (temperature) / (mass)).
+            particle velocities as in statistical mechanics, ``spread``
+            :math:`= \\sqrt{k_{B} T / m}`.
         start
             Value at which the distribution returns zero. In statistical
             mechanics, this only occurs at a velocity of zero (unless the

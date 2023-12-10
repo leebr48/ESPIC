@@ -33,14 +33,6 @@ espic.driver module
    :undoc-members:
    :show-inheritance:
 
-espic.driver\_ex module
------------------------
-
-.. automodule:: espic.driver_ex
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 espic.init\_charges module
 --------------------------
 
@@ -89,26 +81,10 @@ espic.run\_espic module
    :undoc-members:
    :show-inheritance:
 
-espic.shape module
-------------------
-
-.. automodule:: espic.shape
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 espic.solve\_maxwell module
 ---------------------------
 
 .. automodule:: espic.solve_maxwell
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-espic.test\_maxwell\_solver module
-----------------------------------
-
-.. automodule:: espic.test_maxwell_solver
    :members:
    :undoc-members:
    :show-inheritance:

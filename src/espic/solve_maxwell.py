@@ -1,6 +1,6 @@
 """
-Implements solvers in 1D and 2D for Poisson's equation for the electrostatic
-potential given the charge density.
+Implements ``MaxwellDolver1D`` and ``MaxwellSolver2D``, which solve Poisson's
+equation for the electrostatic potential given the charge density.
 """
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ class MaxwellSolver1D:
     c
         Speed of light in meters per second.
     normalize
-        If False, perform calculations in "raw" units. If True,
+        If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
     """
@@ -107,7 +107,7 @@ class MaxwellSolver2D:
     c
         Speed of light in meters per second.
     normalize
-        If False, perform calculations in "raw" units. If True,
+        If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
     """
@@ -142,14 +142,14 @@ class MaxwellSolver2D:
     @cached_property
     def a(self) -> FArray:
         """
-        Returns the :math:`a` matrix in :math:`a * phi = b` that will be
-        inverted to solve for :math:`a`. # FIXME solve for a or phi?
+        Returns the :math:`a` matrix in :math:`a * \\phi = b` that will be
+        inverted to solve for :math:`a`. # FIXME solve for a or \\phi?
         It contains the coffeicients that arise from the finite-differencing
         scheme.
 
         Returns
         -------
-            The :math:`a` matrix in :math:`a * phi = b`.
+            The :math:`a` matrix in :math:`a * \\phi = b`.
 
         """
         # It's better to set a in the initialization, since it doesn't change over time.
@@ -157,7 +157,7 @@ class MaxwellSolver2D:
 
     def set_a(self, n: int) -> FArray:
         """
-        The loops used to initialize the :math:`a` matrix in :math:`a * phi = b`.
+        The loops used to initialize the :math:`a` matrix in :math:`a * \\phi = b`.
 
         Parameters
         ----------
@@ -166,7 +166,7 @@ class MaxwellSolver2D:
 
         Returns
         -------
-            The :math:`a` matrix in :math:`a * phi = b`.
+            The :math:`a` matrix in :math:`a * \\phi = b`. #FIXME do a and set_a return the same thing?
 
         """
         n2 = (n - 2) * (n - 2)
@@ -199,7 +199,7 @@ class MaxwellSolver2D:
 
     def set_rhs(self, n: int, h: float, rho: FArray, bc: dict[str, FArray]) -> FArray:
         """
-        Sets the :math:`b` vector in :math:`a * phi = b`.
+        Sets the :math:`b` vector in :math:`a * \\phi = b`.
         It contains information about the charge density
         and the boundary conditions.
 
@@ -216,7 +216,7 @@ class MaxwellSolver2D:
 
         Returns
         -------
-            The :math:`b` vector in :math:`a * phi = b`.
+            The :math:`b` vector in :math:`a * \\phi = b`.
         """
         n2 = (n - 2) * (n - 2)
         rho = rho[1:-1, 1:-1]
