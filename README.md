@@ -9,5 +9,3 @@ FIXME once code is done, figure out the minimum version of python needed and cha
 FIXME do you want this README to be displayed on the front page of your docs? Do you know how to get anything else to display?
 
 FIXME you should add instructions for use here.
-
-FIXME make sure that your document building on Github Pages is working correctly!
