@@ -103,4 +103,9 @@ class Initialize:
         return np.sort(np.random.default_rng().choice(grid, size=self.size, p=pm))
 
     def zero(self) -> FArray:
+        """
+        Produce an array of zeros in the proper format for the
+        ``positions`` or ``velocities`` attributes of the ``Particles``
+        class.
+        """
         return np.zeros(self.size)

@@ -46,12 +46,11 @@ class ChargeDeposition:
 
         Parameters
         ----------
-        grid : Uniform1DGrid | Uniform2DGrid
+        grid
             The grid used to calculate the charge density.
 
         Returns
         -------
-        FArray
             The different coordinate pairs.
 
         """
@@ -70,9 +69,9 @@ class ChargeDeposition:
 
         Parameters
         ----------
-        q_arr : FArray
+        q_arr
             The charges of each particle in the simulation.
-        pos_arr : FArray
+        pos_arr
             The positions of each particle in the simulation.
 
         Returns

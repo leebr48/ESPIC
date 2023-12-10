@@ -52,7 +52,6 @@ class MaxwellSolver1D:
         self.c = c
         self.normalize = normalize
 
-    # Centered differences. FIXME should we make it arbitrary?
     def solve(self, rho: FArray) -> FArray:
         """
         Solves the 1D Poisson's equation for a given charge distribution.
@@ -84,8 +83,6 @@ class MaxwellSolver1D:
         bc[-1] = self.boundary_conditions[1]
         rhs = -(delta**2) * rho / (epsilon_0) + bc
 
-        # For some reason, not setting check_finite=False results in NaN errors?
-        # Might be due to how small the values are, which is a separate issue.
         phi[1:-1] = solve_banded((1, 1), bands, rhs, check_finite=False)
 
         if self.normalize:
@@ -94,7 +91,6 @@ class MaxwellSolver1D:
 
 
 # Code taken from https://john-s-butler-dit.github.io/NumericalAnalysisBook/Chapter%2009%20-%20Elliptic%20Equations/903_Poisson%20Equation-Boundary.html
-# FIXME: for now, this assumes equal spacing in x and y.
 class MaxwellSolver2D:
     """
     Solves Poisson's equation in 2D.
@@ -221,7 +217,6 @@ class MaxwellSolver2D:
         Returns
         -------
             The :math:`b` vector in :math:`a * phi = b`.
-
         """
         n2 = (n - 2) * (n - 2)
         rho = rho[1:-1, 1:-1]
@@ -259,14 +254,13 @@ class MaxwellSolver2D:
         Returns
         -------
             The electrostatic potential evaluated on grid points.
-
         """
         gridsize = len(self.x_grid)
         h = self.x_grid[1] - self.x_grid[0]
         rhs = self.set_rhs(gridsize, h, rho, self.boundary_conditions)
 
         # This is still a banded matrix, but now the locations of
-        # the bands depends on n. Will make more efficient later. # FIXME true?
+        # the bands depends on n.
         phi_v = solve(self.a, rhs)
         phi = np.zeros((gridsize, gridsize))
 

@@ -95,7 +95,7 @@ class InterpolatedField:
         the list index. (For instance, in the 2D case, this object would contain
         :math:`[E_{x}, E_{y}]`).
         """
-        # We can interpolate the electric field using the PChip algorithm because it
+        # We can interpolate the electric field using the PCHIP algorithm because it
         # does not overshoot, which is quite important when working with electric
         # fields and potentials.
         return [

@@ -126,7 +126,6 @@ class RunESPIC:
             )
 
         if init_pos is None:
-            # self.init_pos = init_state.uniform(boundaries["left"], boundaries["right"])
             self.init_pos = init_state.sinusoidal(self.k, self.grid.grid)
         else:
             self.init_pos = init_pos
@@ -160,17 +159,10 @@ class RunESPIC:
             self.physical_parameters["q"] * np.ones(self.num_particles) * self.signs
         )
 
-        # self.initialize_solvers()
-
-    def initialize_solvers(
-        self,
-    ) -> None:
+    def initialize_solvers(self) -> None:
         """
-
         Initializes the Particles, ChargeDeposition, MaxwellSolver1D (or 2D),
         and PariclePusher objects used to self-consistently evolve the particle states.
-
-
         """
         particles = Particles(self.charges, self.masses, self.init_pos, self.init_vel)
 
@@ -215,11 +207,9 @@ class RunESPIC:
     def run(self) -> None:
         """
         Runs the simuation. Steps are
-
-        1) Evolve particle positions and velocities using current electric field.
-        2) Compute new charge density.
-        3) Compute new electrostatic potential.
-
+        #. Evolve particle positions and velocities using current electric field.
+        #. Compute new charge density.
+        #. Compute new electrostatic potential.
         """
         t = 0
         self.rho_v_time = ()
@@ -248,13 +238,11 @@ class RunESPIC:
 
     def compute_plasma_frequency(self) -> float:
         """
-        Computes plasma frequency = sqrt(n * e^2/(m epsilon_0))
+        Computes plasma frequency = sqrt(n * e^2/(m epsilon_0)).
 
         Returns
         -------
-        float
-            The plasma frequency
-
+            The plasma frequency.
         """
         ne = self.physical_parameters["ne"]
         q = self.physical_parameters["q"]
@@ -269,12 +257,11 @@ class RunESPIC:
 
         Parameters
         ----------
-        phi : FArray
+        phi
             The electrostatic potential.
 
         Returns
         -------
-        float
             The integral of phi along x.
 
         """
