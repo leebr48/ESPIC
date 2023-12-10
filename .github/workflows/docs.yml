@@ -22,8 +22,11 @@ jobs:
         id: pages
         uses: actions/configure-pages@v2
 
+      - name: install nox
+        run: pip install nox
+      
       - name: build output
-        run: pipx run nox -s docs
+        run: nox -s docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
