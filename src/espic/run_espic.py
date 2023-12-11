@@ -269,3 +269,10 @@ class RunESPIC:
 
         """
         return np.trapz(self.grid.grid, phi)
+
+    def compute_fft(self, quantity: FArray) -> FArray:
+        fft = np.abs(np.fft.fft2(quantity))
+        freq = np.fft.fftfreq(fft.shape[0], self.dt)
+        k_arr = np.fft.fftfreq(fft.shape[1], self.grid.delta)
+
+        return freq, k_arr, fft
