@@ -146,7 +146,7 @@ class MaxwellSolver2D:
     def a(self) -> FArray:
         """
         Returns the :math:`a` matrix in :math:`a * \\phi = b` that will be
-        inverted to solve for :math:`a`. # FIXME solve for a or \\phi?
+        inverted to solve for :math:`a`.
         It contains the coffeicients that arise from the finite-differencing
         scheme.
 

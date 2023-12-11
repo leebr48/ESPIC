@@ -94,7 +94,7 @@ class ParticlePusher:
     def evolve_leapfrog(
         self,
         dt: float | None = None,
-    ) -> None:  # FIXME this needs a test
+    ) -> None:
         """
         Evolve the particle positions and velocities forward one time step
         using the leapfrog method.
@@ -139,10 +139,6 @@ class ParticlePusher:
             dv_32 *= 1 / (self.omega_p * self.c)
 
         self.particles.velocities = self.particles.velocities + dv_32
-
-        # Normalization introduces 1/(omega_p * c)
-        # But to go from E_n to E, need to multiply by (c/omega_p)**2
-        # (tracking normalizations from phi)
 
     def update_field(self, new_electric_field: InterpolatedField) -> None:
         """
