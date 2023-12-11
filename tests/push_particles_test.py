@@ -119,7 +119,7 @@ def test_dt_change():
 
 
 def test_push_update_field():
-    # Particles move in 2D under influence of semiparabolic potential - test field update
+    # Particles move in 2D under influence of hyperbolic potential - test field update
     qs = np.asarray([2, -1])
     ms = np.asarray([5, 2])
     positions = np.asarray([[0.5, -0.25], [0.25, 1]])
@@ -143,7 +143,7 @@ def test_push_update_field():
 
 
 def test_push_update_potential():
-    # Particles move in 2D under influence of semiparabolic potential - test potential update
+    # Particles move in 2D under influence of hyperbolic potential - test potential update
     qs = np.asarray([2, -1])
     ms = np.asarray([5, 2])
     positions = np.asarray([[0.5, -0.25], [0.25, 1]])

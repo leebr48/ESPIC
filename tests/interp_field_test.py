@@ -74,8 +74,8 @@ def test_interpolate_field_2D_parabolic_potential():
     assert np.allclose(evaluated_field, target_field)
 
 
-def test_interpolate_field_2D_semiparabolic_potential():
-    # 2D test with semiparabolic potential - check numerical accuracy
+def test_interpolate_field_2D_hyperbolic_potential():
+    # 2D test with hyperbolic potential - check numerical accuracy
     x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
     y_grid = x_grid
     xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")
@@ -103,7 +103,7 @@ def test_interpolate_field_asymmetric_grids_messy_potential():
 
 
 def test_interpolate_field_updater():
-    # 2D test with semiparabolic potential - check you can update the potential properly
+    # 2D test with hyperbolic potential - check you can update the potential properly
     x_grid = Uniform1DGrid(num_points=1000, x_min=-2, x_max=2)
     y_grid = x_grid
     xx, yy = np.meshgrid(x_grid.grid, y_grid.grid, indexing="ij")

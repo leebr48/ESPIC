@@ -20,7 +20,7 @@ def test_1d_uniform():
 
 def test_2d_A():
     ms = MaxwellSolver2D()
-    A = ms.set_A(4)
+    A = ms.set_a(4)
 
     true_A = np.array([[-4, 1, 1, 0], [1, -4, 0, 1], [1, 0, -4, 1], [0, 1, 1, -4]])
     np.testing.assert_allclose(A, true_A, atol=1e-9)
@@ -66,9 +66,6 @@ def test_2d_laplace():
                 * np.sin(i * np.pi * Y / a)
             )
 
-    # FIXME There are some issues that I believe are related to the convergence of an infinite Fourier series
-    # FIXME For now, these "magic" numbers should be kept fixed.
-
     err = np.abs(true_phi[1:-1, 1:-1] - phi[1:-1, 1:-1])
     np.testing.assert_allclose(err, np.zeros(err.shape), atol=1e-2)
 
@@ -113,7 +110,5 @@ def test_2d_poisson_uniform():
                 * np.sin(i * np.pi * Y / a)
             )
     true_phi += -rho / (4*epsilon_0) * (X**2 + Y**2)
-    # FIXME There are some issues that I believe are related to the convergence of an infinite Fourier series
-    # FIXME For now, these "magic" numbers should be kept fixed.
     err = np.abs(true_phi - phi)*epsilon_0
     np.testing.assert_allclose(err, np.zeros(err.shape), atol=0.1)

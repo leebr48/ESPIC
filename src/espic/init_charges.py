@@ -84,8 +84,8 @@ class Initialize:
         ----------
         spread
             Width of the distribution. If the distribution is used to model
-            particle velocities as in statistical mechanics, ``spread`` ==
-            sqrt((Boltzmann constant) * (temperature) / (mass)).
+            particle velocities as in statistical mechanics, ``spread``
+            :math:`= \\sqrt{k_{B} T / m}`.
         start
             Value at which the distribution returns zero. In statistical
             mechanics, this only occurs at a velocity of zero (unless the
@@ -100,7 +100,12 @@ class Initialize:
     def sinusoidal(self, k: float, grid: FArray) -> FArray:
         p_temp = np.abs(np.sin(2 * np.pi * grid * k))
         pm = p_temp / np.sum(p_temp)
-        return np.sort(np.random.choice(grid, size=self.size, p=pm))
+        return np.sort(np.random.default_rng().choice(grid, size=self.size, p=pm))
 
     def zero(self) -> FArray:
+        """
+        Produce an array of zeros in the proper format for the
+        ``positions`` or ``velocities`` attributes of the ``Particles``
+        class.
+        """
         return np.zeros(self.size)

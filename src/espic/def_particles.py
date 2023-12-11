@@ -11,7 +11,7 @@ IArray = NDArray[np.int32]
 class Particles:
     """
     Store the data for a swarm of particles in a single object.
-    Every attribute is either a 1D or 2D NumPy array.
+    Every attribute is either a 1D or 2D ``numpy`` array.
     The first index specifies the particle number/label.
     The second index, if it exists, specifies vector information
     (see below for details).

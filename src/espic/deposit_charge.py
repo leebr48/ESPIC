@@ -1,4 +1,7 @@
-"""Defines ChargeDeposition class, which places charges at float positions on the spatial grid."""
+"""
+Defines ChargeDeposition class, which places
+charges at float positions on the spatial grid.
+"""
 
 from __future__ import annotations
 
@@ -43,12 +46,11 @@ class ChargeDeposition:
 
         Parameters
         ----------
-        grid : Uniform1DGrid | Uniform2DGrid
+        grid
             The grid used to calculate the charge density.
 
         Returns
         -------
-        FArray
             The different coordinate pairs.
 
         """
@@ -67,14 +69,13 @@ class ChargeDeposition:
 
         Parameters
         ----------
-        q_arr : FArray
+        q_arr
             The charges of each particle in the simulation.
-        pos_arr : FArray
+        pos_arr
             The positions of each particle in the simulation.
 
         Returns
         -------
-        FArray
             The charge density for each point in the grid.
 
         """
@@ -91,6 +92,4 @@ class ChargeDeposition:
             disti = dist[:, i]
             rho += ChargeWeightFunc(disti, self.grid.delta).zeroth_order() * q_arr[i]
 
-        rho = rho.reshape(self.grid.shape)
-
-        return rho
+        return rho.reshape(self.grid.shape)

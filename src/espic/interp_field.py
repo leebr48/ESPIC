@@ -34,6 +34,14 @@ class InterpolatedField:
         Note that this array must be indexed Pythonically.
         In particular, if it is generated with ``numpy.meshgrid``,
         the ``indexing='ij'`` option **must** be used.
+    omega_p
+        Plasma frequency in inverse seconds.
+    c
+        Speed of light in meters per second.
+    normalize
+        If ``False``, perform calculations in "raw" units. If ``True``,
+        normalize equations using the natural units specified
+        by ``omega_p`` and ``c``.
     """
 
     def __init__(
@@ -87,7 +95,7 @@ class InterpolatedField:
         the list index. (For instance, in the 2D case, this object would contain
         :math:`[E_{x}, E_{y}]`).
         """
-        # We can interpolate the electric field using the PChip algorithm because it
+        # We can interpolate the electric field using the PCHIP algorithm because it
         # does not overshoot, which is quite important when working with electric
         # fields and potentials.
         return [

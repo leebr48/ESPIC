@@ -1,6 +1,8 @@
 """
-Defines the driver class for ESPIC used to run simulations
+Defines the driver class for ESPIC used to run simulations.
 """
+
+from __future__ import annotations
 
 import numpy as np
 import scipy.constants as sc
@@ -19,40 +21,40 @@ FArray = NDArray[np.float64]
 
 class RunESPIC:
     """
-    Driver class for the ESPIC particle-in-cell simulation code.
+    Driver class for ESPIC.
 
     Parameters
     ----------
     init_pos
-        Array containing the inital positions of each particle
-    init_vel.
+        Array containing the inital positions of each particle.
+    init_vel
         Array containing the initial velocities of each particle.
-    boundary_conditions:
+    boundary_conditions
         Array or tuple containing the boundary conditions.
-    boundaries:
+    boundaries
         Dictionary containing the limits of the simulation domain. Keys are
-        "top", "bottom", "left", and "right"
-    physical_parameters:
+        ``top``, ``bottom``, ``left``, and ``right``.
+    physical_parameters
         Dictionary containing important physical parameters: the particle charge,
         the particle mass, the speed of light, the background charge density,
         and the plasma frequency.
-    signs:
-        Array containing +1 or -1. Important for sinusoidal charge distributions.
-    num_particles:
+    signs
+        Array containing :math:`+1` or :math:`-1`. Important for sinusoidal charge distributions.
+    num_particles
         The number of particles in the simulation.
-    num_grid:
+    num_grid
         The number of grid points (along each axis).
-    dim:
+    dim
         The spatial dimension of the simulation.
-    dt:
+    dt
         The time-step in the simulation.
-    t_max:
+    t_max
         The maximum time of the simulation.
-    k:
+    k
         The wavevector for initial perturbations. Important for sinusoidal perturbations.
-        For example, the initial density perturbation can be ~ sin(kx).
+        For example, the initial density perturbation can be :math:`\\sim \\sin{kx}`.
     normalize
-        If False, perform calculations in "raw" units. If True,
+        If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
     """
@@ -124,7 +126,6 @@ class RunESPIC:
             )
 
         if init_pos is None:
-            # self.init_pos = init_state.uniform(boundaries["left"], boundaries["right"])
             self.init_pos = init_state.sinusoidal(self.k, self.grid.grid)
         else:
             self.init_pos = init_pos
@@ -158,17 +159,10 @@ class RunESPIC:
             self.physical_parameters["q"] * np.ones(self.num_particles) * self.signs
         )
 
-        # self.initialize_solvers()
-
-    def initialize_solvers(
-        self,
-    ) -> None:
+    def initialize_solvers(self) -> None:
         """
-
-        Initializes the Particles, ChargeDeposition, MaxwellSolver1D (or 2D),
-        and PariclePusher objects used to self-consistently evolve the particle states.
-
-
+        Initializes the ``Particles``, ``ChargeDeposition``, ``MaxwellSolver1D`` (or 2D),
+        and ``PariclePusher`` objects used to self-consistently evolve the particle states.
         """
         particles = Particles(self.charges, self.masses, self.init_pos, self.init_vel)
 
@@ -213,11 +207,9 @@ class RunESPIC:
     def run(self) -> None:
         """
         Runs the simuation. Steps are
-
-        1) Evolve particle positions and velocities using current electric field.
-        2) Compute new charge density.
-        3) Compute new electrostatic potential.
-
+        (1) evolve particle positions and velocities using current electric field,
+        (2) compute new charge density, and
+        (3) compute new electrostatic potential.
         """
         t = 0
         self.rho_v_time = ()
@@ -249,13 +241,11 @@ class RunESPIC:
 
     def compute_plasma_frequency(self) -> float:
         """
-        Computes plasma frequency = sqrt(n * e^2/(m epsilon_0))
+        Computes plasma frequency :math:`= \\sqrt{\\frac{n  e^{2}}{m \\epsilon_{0}}}`.
 
         Returns
         -------
-        float
-            The plasma frequency
-
+            The plasma frequency.
         """
         ne = self.physical_parameters["ne"]
         q = self.physical_parameters["q"]
@@ -270,13 +260,12 @@ class RunESPIC:
 
         Parameters
         ----------
-        phi : FArray
+        phi
             The electrostatic potential.
 
         Returns
         -------
-        float
-            The integral of phi along x.
+            The integral of ``phi`` along x.
 
         """
         return np.trapz(self.grid.grid, phi)

@@ -38,7 +38,7 @@ class ParticlePusher:
     c
         Speed of light in meters per second.
     normalize
-        If False, perform calculations in "raw" units. If True,
+        If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
     """
@@ -70,8 +70,8 @@ class ParticlePusher:
         Parameters
         ----------
         dt
-            If None, use the ``dt`` assigned at class instantiation.
-            Otherwise, use the specified value.
+            If not specified, use the ``dt`` assigned at class
+            instantiation. Otherwise, use the specified value.
         """
         if dt is None:
             dt = self.dt
@@ -91,7 +91,10 @@ class ParticlePusher:
         self.particles.velocities = self.particles.velocities + dv
         self.enforce_boundaries()
 
-    def evolve_leapfrog(self, dt: float | None = None) -> None:
+    def evolve_leapfrog(
+        self,
+        dt: float | None = None,
+    ) -> None:  # FIXME this needs a test
         """
         Evolve the particle positions and velocities forward one time step
         using the leapfrog method.
