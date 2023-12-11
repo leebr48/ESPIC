@@ -21,7 +21,7 @@ jobs:
 
       - run: nox -s lint
 
-  type:
+  check_types:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,12 +32,12 @@ jobs:
 
       - run: pip install nox
 
-      - run: nox -s type
+      - run: nox -s check_types
 
   test:
     strategy:
       matrix:
-        python_version: ["3.8", "3.12"]
+        python_version: ["3.8", "3.11"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

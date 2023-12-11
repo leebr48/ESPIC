@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "espic"
-version = "0.1"
+version = "1.0"
 authors = [
   { name="Patrick Kim" },
   { name="Brandon Lee" },
@@ -25,7 +25,8 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/leebr48/ESPIC"
+Homepage = "https://github.com/leebr48/ESPIC"
+Documentation = "https://leebr48.github.io/ESPIC/"
 
 [project.optional-dependencies]
 test = [

@@ -7,3 +7,8 @@ dependencies:
   - scipy
   - matplotlib
   - pytest
+  - furo
+  - myst-parser
+  - sphinx
+  - sphinx-copybutton
+  - sphinx-autodoc-typehints

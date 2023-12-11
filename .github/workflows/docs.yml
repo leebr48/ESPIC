@@ -18,26 +18,35 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Pages
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: setup pages
         id: pages
         uses: actions/configure-pages@v2
 
+      - name: install nox
+        run: pip install nox
+      
       - name: build output
-        run: pipx run nox -s docs
+        run: nox -s docs
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
-          path: docs/source
+          path: docs/build/html
 
   deploy:
     needs:
       - docs
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: https://leebr48.github.io/ESPIC/
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v3
