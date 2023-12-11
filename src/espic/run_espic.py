@@ -244,6 +244,9 @@ class RunESPIC:
 
             t += self.dt
 
+        self.phi_v_time = np.array(self.phi_v_time)
+        self.rho_v_time = np.array(self.rho_v_time)
+
     def compute_plasma_frequency(self) -> float:
         """
         Computes plasma frequency = sqrt(n * e^2/(m epsilon_0))
