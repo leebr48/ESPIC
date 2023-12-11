@@ -33,12 +33,12 @@ class ChargeDeposition:
     def __init__(
         self,
         shape_func: str = "zeroth_order",
-        grid: Uniform1DGrid | Uniform2DGrid = Uniform1DGrid,  # type: ignore
+        grid: Uniform1DGrid | Uniform2DGrid = Uniform1DGrid,  # type: ignore[assignment]
     ) -> None:
         self.shape_func = shape_func
         self.grid = grid
 
-        if type(self.grid) == type:  # type: ignore
+        if type(self.grid) == type:  # type: ignore[comparison-overlap]
             self.grid = self.grid()
 
     def return_coords(self, grid: Uniform1DGrid | Uniform2DGrid) -> FArray:

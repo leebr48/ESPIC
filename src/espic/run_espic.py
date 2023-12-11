@@ -35,30 +35,20 @@ class RunESPIC:
         Dictionary containing important physical parameters: the particle charge,
         the particle mass, the speed of light, the background charge density,
         and the plasma frequency.
-    signs
-        Array containing :math:`+1` or :math:`-1`. Important for sinusoidal
-        charge distributions.
-    num_particles
-        The number of particles in the simulation.
-    num_grid
-        The number of grid points (along each axis).
-    dim
-        The spatial dimension of the simulation.
-    dt
-        The time-step in the simulation.
-    t_max
-        The maximum time of the simulation.
-    k
-        The wavevector for initial perturbations. Important for sinusoidal
-        perturbations. For example, the initial density perturbation can be
-        :math:`\\sim \\sin{kx}`.
+    perturbation:
+        Dictionary containing information about the initial perturbation
+        to the system.
+        Keys are ``signs`` and ``k`` (the wavenumber)
+    time_param:
+        Dictionary containing information about the time parameters.
+        Keys are ``dt`` (the timestep) and ``t_max`` (the maximum sim time)
     normalize
         If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         init_state: dict[str, FArray],
         boundary_conditions: FArray | dict[str, FArray],
@@ -70,7 +60,7 @@ class RunESPIC:
             "number of grid points": 1000,
             "dimension": 1,
         },
-        time_param: dict[str, float] = {"dt": 0.1, "t_max": 1.0},
+        time_param: dict[str, float] = {"dt": 0.1, "t_max": 1.0},  # noqa: B006
         normalize: bool = False,
     ) -> None:
         self.num_particles: int = resolution["number of particles"]
@@ -108,10 +98,7 @@ class RunESPIC:
             self.perturbation = {"signs": np.ones(self.num_particles), "k": 0.0}
 
     def initialize_parameters(self) -> None:
-        """
-        Initialize the physical parameters of this system.
-
-        """
+        """Initialize the physical parameters of this system."""
         if self.physical_parameters is None:
             self.physical_parameters = {
                 "q": sc.e,
@@ -167,10 +154,7 @@ class RunESPIC:
     def initialize_boundaries(
         self,
     ) -> None:
-        """
-        Initialize the boundaries and boundary conditions of the simulation.
-
-        """
+        """Initialize the boundaries and boundary conditions of the simulation."""
         if self.boundaries is None:
             if self.dim == 1:
                 self.boundaries = {"left": -1, "right": 1}
@@ -214,16 +198,16 @@ class RunESPIC:
 
         if self.dim == 1:
             maxwell_solver = MaxwellSolver1D(
-                boundary_conditions=self.boundary_conditions,  # type: ignore
-                grid=self.grid,  # type: ignore
+                boundary_conditions=self.boundary_conditions,  # type: ignore[arg-type]
+                grid=self.grid,  # type: ignore[arg-type]
                 omega_p=self.omega_p,
                 c=self.physical_parameters["c"],
                 normalize=self.normalize,
             )
         else:
             maxwell_solver = MaxwellSolver2D(
-                boundary_conditions=self.boundary_conditions,  # type: ignore
-                grid=self.grid,  # type: ignore
+                boundary_conditions=self.boundary_conditions,  # type: ignore[arg-type]
+                grid=self.grid,  # type: ignore[arg-type]
                 omega_p=self.omega_p,
                 c=self.physical_parameters["c"],
                 normalize=self.normalize,
@@ -231,7 +215,7 @@ class RunESPIC:
         phi = maxwell_solver.solve(rho)
 
         efield = InterpolatedField(
-            grids=[self.grid],  # type: ignore
+            grids=[self.grid],  # type: ignore[list-item]
             phi_on_grid=phi,
             omega_p=self.omega_p,
             c=self.physical_parameters["c"],
@@ -272,16 +256,16 @@ class RunESPIC:
 
             phi = self.ms.solve(rho)
 
-            self.phi_v_time += (phi,)  # type: ignore
-            self.rho_v_time += (rho,)  # type: ignore
-            self.integrated_phi += (self.integrate_phi(phi),)  # type: ignore
+            self.phi_v_time += (phi,)  # type: ignore[assignment]
+            self.rho_v_time += (rho,)  # type: ignore[assignment]
+            self.integrated_phi += (self.integrate_phi(phi),)  # type: ignore[assignment]
 
             self.pp.update_potential(phi)
 
             t += self.dt
 
-        self.phi_v_time = np.array(self.phi_v_time)  # type: ignore
-        self.rho_v_time = np.array(self.rho_v_time)  # type: ignore
+        self.phi_v_time = np.array(self.phi_v_time)  # type: ignore[assignment]
+        self.rho_v_time = np.array(self.rho_v_time)  # type: ignore[assignment]
 
     def compute_plasma_frequency(self) -> float:
         """
