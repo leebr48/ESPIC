@@ -1,6 +1,4 @@
-"""
-Defines the driver class for ESPIC used to run simulations.
-"""
+"""Defines the driver class for ESPIC used to run simulations."""
 
 from __future__ import annotations
 
@@ -25,10 +23,9 @@ class RunESPIC:
 
     Parameters
     ----------
-    init_pos
-        Array containing the inital positions of each particle.
-    init_vel
-        Array containing the initial velocities of each particle.
+    init_state
+        Dictionary containing the initial state of the particles. Keys are
+        ``initial position``, and ``initial velocity``.
     boundary_conditions
         Array or tuple containing the boundary conditions.
     boundaries
@@ -39,7 +36,8 @@ class RunESPIC:
         the particle mass, the speed of light, the background charge density,
         and the plasma frequency.
     signs
-        Array containing :math:`+1` or :math:`-1`. Important for sinusoidal charge distributions.
+        Array containing :math:`+1` or :math:`-1`. Important for sinusoidal
+        charge distributions.
     num_particles
         The number of particles in the simulation.
     num_grid
@@ -51,8 +49,9 @@ class RunESPIC:
     t_max
         The maximum time of the simulation.
     k
-        The wavevector for initial perturbations. Important for sinusoidal perturbations.
-        For example, the initial density perturbation can be :math:`\\sim \\sin{kx}`.
+        The wavevector for initial perturbations. Important for sinusoidal
+        perturbations. For example, the initial density perturbation can be
+        :math:`\\sim \\sin{kx}`.
     normalize
         If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
@@ -61,31 +60,119 @@ class RunESPIC:
 
     def __init__(
         self,
-        init_pos: FArray,
-        init_vel: FArray,
+        init_state: dict[str, FArray],
         boundary_conditions: FArray | dict[str, FArray],
         boundaries: dict[str, float],
         physical_parameters: dict[str, float],
-        signs: FArray,
-        num_particles: int = 100,
-        num_grid: int = 1000,
-        dim: int = 1,
-        dt: float = 0.1,
-        t_max: float = 10,
-        k: float = 1,
+        perturbation: dict[str, FArray | float],
+        resolution: dict[str, int] = {  # noqa: B006
+            "number of particles": 100,
+            "number of grid points": 1000,
+            "dimension": 1,
+        },
+        time_param: dict[str, float] = {"dt": 0.1, "t_max": 1.0},
         normalize: bool = False,
     ) -> None:
-        self.num_particles = num_particles
-        self.num_grid = num_grid
-        self.dim = dim
-        self.normalize = normalize
-        self.dt = dt
-        self.t_max = t_max
-        self.k = k
+        self.num_particles: int = resolution["number of particles"]
+        self.num_grid: int = resolution["number of grid points"]
+        self.dim: int = resolution["dimension"]
+        self.normalize: bool = normalize
+        self.dt: float = time_param["dt"]
+        self.t_max: float = time_param["t_max"]
 
-        init_state = Initialize(self.num_particles, self.dim)
-        if boundaries is None:
-            if dim == 1:
+        self.init_state = init_state
+        self.boundary_conditions = boundary_conditions
+        self.boundaries = boundaries
+        self.physical_parameters = physical_parameters
+        self.perturbation = perturbation
+
+        self.initialize_boundaries()
+        self.initialize_grid()
+        self.initialize_perturbation()
+        self.initialize_state()
+        self.initialize_parameters()
+
+        self.masses = self.physical_parameters["m"] * np.ones(self.num_particles)
+        self.charges = (
+            self.physical_parameters["q"]
+            * np.ones(self.num_particles)
+            * self.perturbation["signs"]
+        )
+
+    def initialize_perturbation(self) -> None:
+        """
+        Initialize parameters for the initial (sinusoidal) perturbation
+        to the system.
+        """
+        if self.perturbation is None:
+            self.perturbation = {"signs": np.ones(self.num_particles), "k": 0.0}
+
+    def initialize_parameters(self) -> None:
+        """
+        Initialize the physical parameters of this system.
+
+        """
+        if self.physical_parameters is None:
+            self.physical_parameters = {
+                "q": sc.e,
+                "m": sc.m_e,
+                "c": sc.c,
+                "ne": 100,
+                "vth": 0.01 * sc.c,
+            }
+
+        if self.normalize:
+            self.physical_parameters["vth"] /= sc.c
+        self.omega_p = self.compute_plasma_frequency()
+
+    def initialize_state(
+        self,
+    ) -> None:
+        """
+        Initialize the initial state of the particles, i.e. their positions
+        and velocities.
+
+        """
+        initialize = Initialize(self.num_particles, self.dim)
+        if self.init_state is None:
+            self.init_state = {
+                "initial position": initialize.sinusoidal(
+                    self.perturbation["k"],
+                    self.grid.grid,
+                ),
+                "initial velocity": initialize.uniform(
+                    self.boundaries["left"],
+                    self.boundaries["right"],
+                ),
+            }
+
+    def initialize_grid(self) -> None:
+        """Initialize the computational grid."""
+        self.grid: Uniform1DGrid | Uniform2DGrid
+        if self.dim == 1:
+            self.grid = Uniform1DGrid(
+                self.num_grid,
+                self.boundaries["left"],
+                self.boundaries["right"],
+            )
+        else:
+            self.grid = Uniform2DGrid(
+                self.num_grid,
+                self.boundaries["left"],
+                self.boundaries["right"],
+                self.boundaries["bottom"],
+                self.boundaries["top"],
+            )
+
+    def initialize_boundaries(
+        self,
+    ) -> None:
+        """
+        Initialize the boundaries and boundary conditions of the simulation.
+
+        """
+        if self.boundaries is None:
+            if self.dim == 1:
                 self.boundaries = {"left": -1, "right": 1}
             else:
                 self.boundaries = {
@@ -94,100 +181,57 @@ class RunESPIC:
                     "left": -1,
                     "right": 1,
                 }
-        else:
-            self.boundaries = boundaries
 
-        if boundary_conditions is None:
-            if dim == 1:
+        if self.boundary_conditions is None:
+            if self.dim == 1:
                 self.boundary_conditions = np.zeros(2)
             else:
                 self.boundary_conditions = {
                     "bottom": np.zeros(self.num_grid),
                     "top": np.zeros(self.num_grid),
                     "left": np.zeros(self.num_grid),
-                    "right": np.zeros(self, num_grid),
+                    "right": np.zeros(self.num_grid),
                 }
-        else:
-            self.boundary_conditions = boundary_conditions
 
-        if dim == 1:
-            self.grid = Uniform1DGrid(
-                self.num_grid,
-                self.boundaries["left"],
-                self.boundaries["right"],
-            )
-        if dim == 2:
-            self.grid = Uniform2DGrid(
-                self.num_grid,
-                self.boundaries["left"],
-                self.bundaries["right"],
-                self.boundaries["bottom"],
-                self.boundaries["top"],
-            )
-
-        if init_pos is None:
-            self.init_pos = init_state.sinusoidal(self.k, self.grid.grid)
-        else:
-            self.init_pos = init_pos
-        if init_vel is None:
-            self.init_vel = init_state.uniform(boundaries["left"], boundaries["right"])
-        else:
-            self.init_vel = init_vel
-
-        if physical_parameters is None:
-            self.physical_parameters = {
-                "q": sc.e,
-                "m": sc.m_e,
-                "c": sc.c,
-                "ne": 100,
-                "vth": 0.01 * sc.c,
-            }
-        else:
-            self.physical_parameters = physical_parameters
-
-        if self.normalize:
-            self.physical_parameters["vth"] /= sc.c
-        self.omega_p = self.compute_plasma_frequency()
-
-        if signs is None:
-            self.signs = np.ones(self.num_particles)
-        else:
-            self.signs = signs
-
-        self.masses = self.physical_parameters["m"] * np.ones(self.num_particles)
-        self.charges = (
-            self.physical_parameters["q"] * np.ones(self.num_particles) * self.signs
+    def initialize_solvers(
+        self,
+    ) -> tuple[ChargeDeposition, MaxwellSolver1D | MaxwellSolver2D, ParticlePusher]:
+        """
+        Initialize the ``Particles``, ``ChargeDeposition``, ``MaxwellSolver1D``
+        (or 2D), and ``PariclePusher`` objects used to self-consistently evolve
+        the particle states.
+        """
+        particles = Particles(
+            self.charges,
+            self.masses,
+            self.init_state["initial position"],
+            self.init_state["initial velocity"],
         )
-
-    def initialize_solvers(self) -> None:
-        """
-        Initializes the ``Particles``, ``ChargeDeposition``, ``MaxwellSolver1D`` (or 2D),
-        and ``PariclePusher`` objects used to self-consistently evolve the particle states.
-        """
-        particles = Particles(self.charges, self.masses, self.init_pos, self.init_vel)
 
         charge_deposition = ChargeDeposition(grid=self.grid)
         rho = charge_deposition.deposit(particles.charges, particles.positions)
+        maxwell_solver: MaxwellSolver1D | MaxwellSolver2D
 
         if self.dim == 1:
             maxwell_solver = MaxwellSolver1D(
-                boundary_conditions=self.boundary_conditions,
-                grid=self.grid,
+                boundary_conditions=self.boundary_conditions,  # type: ignore
+                grid=self.grid,  # type: ignore
                 omega_p=self.omega_p,
                 c=self.physical_parameters["c"],
                 normalize=self.normalize,
             )
         else:
             maxwell_solver = MaxwellSolver2D(
-                boundary_conditions=self.boundary_conditions,
-                grid=self.grid,
+                boundary_conditions=self.boundary_conditions,  # type: ignore
+                grid=self.grid,  # type: ignore
                 omega_p=self.omega_p,
                 c=self.physical_parameters["c"],
                 normalize=self.normalize,
             )
         phi = maxwell_solver.solve(rho)
+
         efield = InterpolatedField(
-            grids=[self.grid],
+            grids=[self.grid],  # type: ignore
             phi_on_grid=phi,
             omega_p=self.omega_p,
             c=self.physical_parameters["c"],
@@ -206,12 +250,12 @@ class RunESPIC:
 
     def run(self) -> None:
         """
-        Runs the simuation. Steps are
+        Run the simuation. Steps are
         (1) evolve particle positions and velocities using current electric field,
         (2) compute new charge density, and
         (3) compute new electrostatic potential.
         """
-        t = 0
+        t = 0.0
         self.rho_v_time = ()
         self.phi_v_time = ()
         self.integrated_phi = ()
@@ -228,20 +272,20 @@ class RunESPIC:
 
             phi = self.ms.solve(rho)
 
-            self.phi_v_time += (phi,)
-            self.rho_v_time += (rho,)
-            self.integrated_phi += (self.integrate_phi(phi),)
+            self.phi_v_time += (phi,)  # type: ignore
+            self.rho_v_time += (rho,)  # type: ignore
+            self.integrated_phi += (self.integrate_phi(phi),)  # type: ignore
 
             self.pp.update_potential(phi)
 
             t += self.dt
 
-        self.phi_v_time = np.array(self.phi_v_time)
-        self.rho_v_time = np.array(self.rho_v_time)
+        self.phi_v_time = np.array(self.phi_v_time)  # type: ignore
+        self.rho_v_time = np.array(self.rho_v_time)  # type: ignore
 
     def compute_plasma_frequency(self) -> float:
         """
-        Computes plasma frequency :math:`= \\sqrt{\\frac{n  e^{2}}{m \\epsilon_{0}}}`.
+        Compute plasma frequency :math:`= \\sqrt{\\frac{n  e^{2}}{m \\epsilon_{0}}}`.
 
         Returns
         -------
@@ -251,11 +295,11 @@ class RunESPIC:
         q = self.physical_parameters["q"]
         m = self.physical_parameters["m"]
 
-        return np.sqrt(ne * q**2 / (m * sc.epsilon_0))
+        return float(np.sqrt(ne * q**2 / (m * sc.epsilon_0)))
 
     def integrate_phi(self, phi: FArray) -> float:
         """
-        Integrates the electrostatic potential (currently in 1D).
+        Integrate the electrostatic potential (currently in 1D).
         Uses a trapezoidal scheme.
 
         Parameters
@@ -268,9 +312,23 @@ class RunESPIC:
             The integral of ``phi`` along x.
 
         """
-        return np.trapz(self.grid.grid, phi)
+        return float(np.trapz(self.grid.grid, phi))
 
-    def compute_fft(self, quantity: FArray) -> FArray:
+    def compute_fft(self, quantity: FArray) -> tuple[FArray, FArray, FArray]:
+        """
+        Compute the FFT of a given quantity over space and time.
+
+        Parameters
+        ----------
+        quantity : FArray
+            Quantity to be FFT'd.
+
+        Returns
+        -------
+        FArray
+            The FFT of the input quantity.
+
+        """
         fft = np.abs(np.fft.fft2(quantity))
         freq = np.fft.fftfreq(fft.shape[0], self.dt)
         k_arr = np.fft.fftfreq(fft.shape[1], self.grid.delta)
