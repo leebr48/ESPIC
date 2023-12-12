@@ -105,14 +105,13 @@ class Initialize:
 
         Parameters
         ----------
-        k : float
+        k
             The wavenumber used to define the sinusoid.
-        grid : FArray
-            The computational grid.
+        grid
+            The spatial grid.
 
         Returns
         -------
-        FArray
             Samples from sinusoidal distribution.
 
         """

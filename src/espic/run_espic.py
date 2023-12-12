@@ -35,17 +35,21 @@ class RunESPIC:
         Dictionary containing important physical parameters: the particle charge,
         the particle mass, the speed of light, the background charge density,
         and the plasma frequency.
-    perturbation:
+    perturbation
         Dictionary containing information about the initial perturbation
         to the system.
         Keys are ``signs`` and ``k`` (the wavenumber)
-    time_param:
+    time_param
         Dictionary containing information about the time parameters.
         Keys are ``dt`` (the timestep) and ``t_max`` (the maximum sim time)
     normalize
         If ``False``, perform calculations in "raw" units. If ``True``,
         normalize equations using the natural units specified
         by ``omega_p`` and ``c``.
+    resolution
+        Dictionary describing the number of particles to simulate, the
+        number of spatial grid points to use, and the number of spatial
+        dimensions to use.
     """
 
     def __init__(  # noqa: PLR0913
@@ -112,13 +116,10 @@ class RunESPIC:
             self.physical_parameters["vth"] /= sc.c
         self.omega_p = self.compute_plasma_frequency()
 
-    def initialize_state(
-        self,
-    ) -> None:
+    def initialize_state(self) -> None:
         """
         Initialize the initial state of the particles, i.e. their positions
         and velocities.
-
         """
         initialize = Initialize(self.num_particles, self.dim)
         if self.init_state is None:
@@ -294,24 +295,22 @@ class RunESPIC:
         Returns
         -------
             The integral of ``phi`` along x.
-
         """
         return float(np.trapz(self.grid.grid, phi))
 
     def compute_fft(self, quantity: FArray) -> tuple[FArray, FArray, FArray]:
         """
-        Compute the FFT of a given quantity over space and time.
+        Compute the Fast Fourier Transform of a given quantity
+        over space and time.
 
         Parameters
         ----------
-        quantity : FArray
+        quantity
             Quantity to be FFT'd.
 
         Returns
         -------
-        FArray
             The FFT of the input quantity.
-
         """
         fft = np.abs(np.fft.fft2(quantity))
         freq = np.fft.fftfreq(fft.shape[0], self.dt)
