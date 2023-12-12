@@ -33,16 +33,19 @@ class ChargeDeposition:
     def __init__(
         self,
         shape_func: str = "zeroth_order",
-        grid: Uniform1DGrid | Uniform2DGrid = Uniform1DGrid(),
+        grid: Uniform1DGrid | Uniform2DGrid = Uniform1DGrid,  # type: ignore[assignment]
     ) -> None:
         self.shape_func = shape_func
         self.grid = grid
 
+        if type(self.grid) == type:  # type: ignore[comparison-overlap]
+            self.grid = self.grid()
+
     def return_coords(self, grid: Uniform1DGrid | Uniform2DGrid) -> FArray:
         """
-        Returns the coordinate pairs from the grid. For a 1D grid, just returns
-        a column vector with each x point. For a 2D grid, it returns all the
-        possible (x,y) coordinates.
+        Return the coordinate pairs from the grid.
+        For a 1D grid, just returns a column vector with each x point.
+        For a 2D grid, it returns all the possible (x,y) coordinates.
 
         Parameters
         ----------
@@ -54,18 +57,18 @@ class ChargeDeposition:
             The different coordinate pairs.
 
         """
-        if len(self.grid.shape) == 1:
-            coords = np.array(self.grid.grid).reshape((len(self.grid.grid), 1))
+        if len(grid.shape) == 1:
+            coords = np.array(grid.grid).reshape((len(grid.grid), 1))
         else:
             c: tuple[FArray, ...] = ()
-            for i in range(len(self.grid.grid)):
-                c = c + (self.grid.grid[len(self.grid.grid) - (i + 1)].ravel(),)
+            for i in range(len(grid.grid)):
+                c = (*c, grid.grid[len(grid.grid) - (i + 1)].ravel())
             coords = np.column_stack(c)
         return coords
 
     def deposit(self, q_arr: FArray, pos_arr: FArray) -> FArray:
         """
-        Computes the charge density on the given grid.
+        Compute the charge density on the given grid.
 
         Parameters
         ----------

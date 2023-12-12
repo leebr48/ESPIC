@@ -201,3 +201,60 @@ def test_push_2D_linear_potential_multiparticle_enforce_boundary():
 
     assert np.allclose(particle_pusher.particles.positions, np.asarray([[1, 0], [0, 1]]))
     assert np.allclose(particle_pusher.particles.velocities, np.asarray([[-1.988, 2.012], [2.075, -1.925]]))
+
+
+def test_push_1D_null_field_leapfrog():
+    # Simplest possible test - one particle moves in straight lines
+    q = np.asarray([2])
+    m = np.asarray([5.5])
+    pos = np.asarray([[0.5]])
+    vel = np.asarray([[-2]])
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = np.ones(x_grid.size)
+    dt = 1e-2
+    particles = Particles(q, m, pos, vel)
+    interpolated_field = InterpolatedField([x_grid], phi_on_grid)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    particle_pusher.evolve_leapfrog()
+
+    assert np.allclose(particle_pusher.particles.positions, pos + vel * dt)
+
+def test_push_1D_linear_potential_leapfrog():
+    # Particle moves in 1D under influence of a constant electric field
+    q = np.asarray([2])
+    m = np.asarray([5])
+    pos = np.asarray([[0.5]])
+    vel = np.asarray([[2]])
+    x_grid = Uniform1DGrid(num_points=100, x_min=0, x_max=1)
+    phi_on_grid = 3 * x_grid.grid
+    dt = 1e-2
+    particles = Particles(q, m, pos, vel)
+    interpolated_field = InterpolatedField([x_grid], phi_on_grid)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    particle_pusher.evolve_leapfrog()
+    particle_pusher.evolve_leapfrog()
+
+    true_pos = np.array([[-q/m * (3) * (2*dt)**2/2 + vel * (2*dt) + pos]])
+
+    assert np.allclose(particle_pusher.particles.positions.flatten(), true_pos.flatten())
+
+def test_push_1D_linear_potential_multiparticle_leapfrog():
+    # Particles move in 1D under influence of a constant electric field
+    qs = np.asarray([2, -1])
+    ms = np.asarray([5, 2])
+    positions = np.asarray([[0.5], [0.25]])
+    velocities = np.asarray([[2], [-1.5]])
+    x_grid = Uniform1DGrid(num_points=10, x_min=0, x_max=1)
+    phi_on_grid = 3 * x_grid.grid
+    dt = 1e-2
+    particles = Particles(qs, ms, positions, velocities)
+    interpolated_field = InterpolatedField([x_grid], phi_on_grid)
+    particle_pusher = ParticlePusher(particles, interpolated_field, dt=dt)
+    particle_pusher.evolve_leapfrog()
+    particle_pusher.evolve_leapfrog()
+
+    true_pos = np.array([[-qs[0]/ms[0] * (3) * (2*dt)**2/2 + velocities[0] * (2*dt) + positions[0]],
+                         [-qs[1]/ms[1] * (3) * (2*dt)**2/2 + velocities[1] * (2*dt) + positions[1]]
+                         ])
+
+    assert np.allclose(particle_pusher.particles.positions.flatten(), true_pos.flatten())

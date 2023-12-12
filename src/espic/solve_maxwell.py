@@ -14,6 +14,9 @@ from scipy.linalg import solve, solve_banded
 from espic.make_grid import Uniform1DGrid, Uniform2DGrid
 
 FArray = NDArray[np.float64]
+zeros = np.zeros(2)
+grid_1d = Uniform1DGrid()
+grid_2d = Uniform2DGrid()
 
 
 class MaxwellSolver1D:
@@ -39,8 +42,8 @@ class MaxwellSolver1D:
 
     def __init__(
         self,
-        boundary_conditions: FArray = np.zeros(2),
-        grid: Uniform1DGrid = Uniform1DGrid(),
+        boundary_conditions: FArray = zeros,
+        grid: Uniform1DGrid = grid_1d,
         omega_p: float = 1,
         c: float = 1,
         normalize: bool = False,
@@ -115,7 +118,7 @@ class MaxwellSolver2D:
     def __init__(
         self,
         boundary_conditions: dict[str, FArray] | None = None,
-        grid: Uniform2DGrid = Uniform2DGrid(),
+        grid: Uniform2DGrid = grid_2d,
         omega_p: float = 1,
         c: float = 1,
         normalize: bool = False,
@@ -143,7 +146,7 @@ class MaxwellSolver2D:
     def a(self) -> FArray:
         """
         Returns the :math:`a` matrix in :math:`a * \\phi = b` that will be
-        inverted to solve for :math:`a`. # FIXME solve for a or \\phi?
+        inverted to solve for :math:`a`.
         It contains the coffeicients that arise from the finite-differencing
         scheme.
 
@@ -155,18 +158,18 @@ class MaxwellSolver2D:
         # It's better to set a in the initialization, since it doesn't change over time.
         return self.set_a(len(self.x_grid))
 
-    def set_a(self, n: int) -> FArray:
+    def set_a(self, n: int) -> FArray:  # noqa: C901
         """
-        The loops used to initialize the :math:`a` matrix in :math:`a * \\phi = b`.
+        Initialize the :math:`a` matrix in :math:`a * \\phi = b`.
 
         Parameters
         ----------
         n
-            DESCRIPTION. # FIXME
+            The number of grid points
 
         Returns
         -------
-            The :math:`a` matrix in :math:`a * \\phi = b`. #FIXME do a and set_a return the same thing?
+            The :math:`a` matrix in :math:`a * \\phi = b`.
 
         """
         n2 = (n - 2) * (n - 2)
@@ -199,7 +202,7 @@ class MaxwellSolver2D:
 
     def set_rhs(self, n: int, h: float, rho: FArray, bc: dict[str, FArray]) -> FArray:
         """
-        Sets the :math:`b` vector in :math:`a * \\phi = b`.
+        Set the :math:`b` vector in :math:`a * \\phi = b`.
         It contains information about the charge density
         and the boundary conditions.
 

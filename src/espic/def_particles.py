@@ -5,7 +5,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 FArray = NDArray[np.float64]
-IArray = NDArray[np.int32]
 
 
 class Particles:
@@ -32,7 +31,7 @@ class Particles:
 
     def __init__(
         self,
-        charges: IArray,
+        charges: FArray,
         masses: FArray,
         positions: FArray,
         velocities: FArray,

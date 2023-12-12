@@ -98,6 +98,24 @@ class Initialize:
         return np.asarray(maxwell.rvs(loc=start, scale=spread, size=self.size))
 
     def sinusoidal(self, k: float, grid: FArray) -> FArray:
+        """
+        Produce a sinusoidal probability distribution in the proper format for the
+        ``positions`` or ``velocities`` attributes of the ``Particles``
+        class.
+
+        Parameters
+        ----------
+        k : float
+            The wavenumber used to define the sinusoid.
+        grid : FArray
+            The computational grid.
+
+        Returns
+        -------
+        FArray
+            Samples from sinusoidal distribution.
+
+        """
         p_temp = np.abs(np.sin(2 * np.pi * grid * k))
         pm = p_temp / np.sum(p_temp)
         return np.sort(np.random.default_rng().choice(grid, size=self.size, p=pm))

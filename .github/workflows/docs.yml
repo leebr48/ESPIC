@@ -30,7 +30,7 @@ jobs:
 
       - name: install nox
         run: pip install nox
-      
+
       - name: build output
         run: nox -s docs
 
