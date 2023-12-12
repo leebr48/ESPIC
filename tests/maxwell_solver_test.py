@@ -2,8 +2,6 @@ import numpy as np
 
 from espic.make_grid import Uniform2DGrid
 from scipy.constants import epsilon_0
-import matplotlib.pyplot as plt
-# Test 1D Maxwell solver for a uniform charge distribution
 from espic.solve_maxwell import MaxwellSolver1D, MaxwellSolver2D
 
 
@@ -24,10 +22,6 @@ def test_2d_A():
 
     true_A = np.array([[-4, 1, 1, 0], [1, -4, 0, 1], [1, 0, -4, 1], [0, 1, 1, -4]])
     np.testing.assert_allclose(A, true_A, atol=1e-9)
-
-
-def test_2d_boundary():
-    pass
 
 
 def test_2d_laplace():
